@@ -1,7 +1,5 @@
 Markdown · tong-quan-do-an.md
 
-# Tổng quan đồ án tốt nghiệp
-
 ## Tên đề tài
 
 **Xây dựng hệ thống quản lý công việc nhóm phát triển phần mềm tích hợp GitHub và AI hỗ trợ**
