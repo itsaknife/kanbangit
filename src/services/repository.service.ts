@@ -10,7 +10,7 @@ export const repositoryService = {
   /** Những người có thể được giao issue trong repository. */
   // getAssignees: (repoId: number) => http.get<UserSummary[]>(`/repositories/${repoId}/assignees`),
   getAssignees: (repoId: number) => {
-    return http.get<UserSummary[]>('/repositories/${repoId}/assignees');
+    return http.get<UserSummary[]>(`/repositories/${repoId}/assignees`);
   },
 
   /** Kết nối repository: backend lấy toàn bộ issue hiện có và đăng ký webhook. */
