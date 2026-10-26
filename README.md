@@ -1,123 +1,90 @@
-# GitHub Task Board — Frontend
+Markdown · tong-quan-do-an.md
 
-Giao diện web của đồ án: hệ thống quản lý công việc nhóm phát triển phần mềm, đồng bộ hai chiều với GitHub Issues, có AI hỗ trợ.
+## Tên đề tài
 
-**Công nghệ:** Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · dnd-kit · Recharts · socket.io-client
+**Xây dựng hệ thống quản lý công việc nhóm phát triển phần mềm tích hợp GitHub và AI hỗ trợ**
 
-## Chạy dự án
+## Vấn đề
 
-Cần Node.js 20.9 trở lên.
+Team dev nhỏ thường quản lý task qua GitHub Issues, nhưng giao diện không trực quan, không có bảng theo dõi tiến độ (Kanban), không có thống kê ai đang làm gì. Nếu dùng thêm Trello/Jira thì phải cập nhật 2 nơi, dễ sai lệch.
 
-```bash
-npm install
-cp .env.example .env.local   # rồi sửa địa chỉ backend nếu cần
-npm run dev                  # mở http://localhost:3000
-```
+## Chức năng chính
 
-Các lệnh khác: `npm run build`, `npm run lint`, `npm run typecheck`, `npm run format`.
+Ứng dụng web gồm các chức năng sau (theo đề cương):
 
-## Cấu trúc thư mục
+1. **Đăng nhập và kết nối GitHub:** đăng nhập bằng tài khoản GitHub, chọn repository cần theo dõi.
+2. **Quản lý Issue:** xem danh sách, xem chi tiết, tạo mới, chỉnh sửa. Issue tạo hoặc sửa trên app sẽ cập nhật sang GitHub, và ngược lại.
+3. **Kanban Board:** kéo-thả thẻ để đổi trạng thái (Cần làm / Đang làm / Xong), lọc theo nhãn, tìm kiếm. Dùng bộ nhãn chuẩn `bug`, `enhancement`, `task`; repo nào chưa có thì app tự tạo.
+4. **Đồng bộ với GitHub (2 chiều):** lần đầu kết nối thì lấy toàn bộ issue có sẵn; sau đó issue mới hoặc thay đổi bên GitHub tự cập nhật lên bảng (qua webhook), và thao tác trên app tự cập nhật ngược lại GitHub. Giao diện của mọi người đang mở app cập nhật ngay không cần refresh (Socket.io).
+5. **Dashboard:** hiển thị tổng quan, tiến độ theo từng thành viên, và theo thời gian (ví dụ theo tuần) để biết trong tuần nhóm làm được bao nhiêu việc, hiện ai đang làm việc gì.
+6. **AI tóm tắt tiến độ** và 7. **AI phát hiện issue trùng** (xem mục dưới).
 
-```
-src/
-├── app/                 # Chỉ chứa route (page, layout). Mỗi page chỉ ghép component, không có logic
-│   ├── (auth)/login/            # Trang đăng nhập
-│   └── (main)/                  # Nhóm trang yêu cầu đăng nhập (có AuthGuard + AppShell)
-│       └── repositories/
-│           ├── page.tsx                      # Danh sách repository
-│           └── [repoId]/
-│               ├── board/                    # Bảng Kanban
-│               ├── issues/                   # Danh sách issue
-│               ├── issues/[issueNumber]/     # Chi tiết issue
-│               └── dashboard/                # Dashboard + báo cáo AI
-├── components/          # Giao diện, mỗi module một folder riêng
-│   ├── ui/                      # Thành phần dùng chung: Button, Input, Modal, Badge...
-│   ├── layout/                  # Header, AppShell, RepoTabs
-│   ├── auth/                    # LoginCard, AuthGuard
-│   ├── repositories/            # RepositoryList, RepositoryCard
-│   ├── issues/                  # IssueList, IssueForm, IssueDetail, DuplicateWarning...
-│   ├── board/                   # KanbanBoard, BoardColumn, BoardCard (kéo-thả)
-│   ├── dashboard/               # DashboardOverview, các biểu đồ, StatCard
-│   └── ai/                      # WeeklySummaryPanel
-├── hooks/               # Logic có state: useIssues, useBoard, useDashboard, useAuth...
-├── services/            # Gọi API và socket: http.ts, socket.ts, *.service.ts
-├── utils/               # Hàm thuần, không phụ thuộc React: formatDate, filterIssues...
-├── providers/           # React Context (AuthProvider)
-├── types/               # Kiểu dữ liệu TypeScript, chia theo module
-├── constants/           # Hằng số: routes, cột Kanban, nhãn chuẩn, tên socket event
-└── config/              # Đọc biến môi trường
-```
+## Module AI
 
-## Luồng dữ liệu
+Dùng **API LLM miễn phí** (Gemini API gói miễn phí, lấy khóa trên Google AI Studio).
 
-```
-page  →  component  →  hook  →  service  →  http / socket  →  backend
-```
+**1. AI tóm tắt tiến độ**
 
-Mỗi tầng chỉ gọi xuống tầng ngay dưới nó:
+Hệ thống lấy dữ liệu từ database (issue đã đóng, issue đang làm, ai phụ trách) → gửi cho LLM → LLM viết thành một đoạn báo cáo ngắn. Ví dụ đầu ra: *"Tuần 12, nhóm đã hoàn thành 3 issue là chức năng đăng nhập, tìm kiếm và giao diện. Hiện có 2 issue đang được thực hiện, trong đó A phụ trách Payment API và B phụ trách Notification."*
 
-- **page** (`app/`): chỉ ghép component, không viết logic.
-- **component**: chỉ lo hiển thị, lấy dữ liệu và thao tác qua hook. Không gọi `fetch` trực tiếp.
-- **hook**: giữ state, xử lý logic (lọc, optimistic update, nhận dữ liệu realtime). Không có JSX.
-- **service**: chỉ gọi API, mỗi module một file, trả về đúng kiểu dữ liệu.
-- **utils**: hàm thuần, dễ test.
+**2. AI phát hiện issue trùng**
 
-## Quy ước đặt tên
+Làm theo 2 bước kết hợp:
 
-| Loại            | Quy ước                                  | Ví dụ              |
-| --------------- | ---------------------------------------- | ------------------ |
-| Component       | `PascalCase.tsx`, một component một file | `IssueForm.tsx`    |
-| Hook            | `useXxx.ts`                              | `useIssues.ts`     |
-| Service         | `xxx.service.ts`                         | `issue.service.ts` |
-| Type            | `xxx.types.ts`                           | `issue.types.ts`   |
-| Util / constant | `camelCase.ts` (constants: `kebab-case`) | `formatDate.ts`    |
+1. **Lọc nhanh bằng embedding:** khi có issue mới, hệ thống gửi nội dung (tiêu đề + mô tả) cho dịch vụ embedding để đổi thành dãy số đại diện cho ý nghĩa. Database (pgvector) so sánh dãy số này với các issue cũ và chọn ra khoảng 3 issue gần giống nhất. Bước này không dùng LLM.
+2. **LLM đọc và nhận định:** hệ thống gửi nội dung chữ (không phải dãy số) của issue mới và 3 issue ứng viên cho LLM, hỏi có trùng không và vì sao. Nếu LLM kết luận trùng thì app cảnh báo "có thể trùng với issue #23" kèm lý do.
 
-- Mỗi folder đều có `index.ts` để import gọn: `import { Button } from "@/components/ui"`.
-- Dùng alias `@/` trỏ tới `src/`, không dùng đường dẫn tương đối kiểu `../../..`.
-- Không viết cứng đường dẫn trang: dùng `ROUTES` trong `constants/routes.ts`.
+Bước 1 giúp mỗi lần chỉ gửi vài issue cho LLM, tiết kiệm lượt gọi của gói miễn phí. Bước 2 giúp AI thật sự đọc hiểu mô tả và giải thích được lý do. Dãy số chỉ để database tìm ứng viên, LLM không đọc dãy số.
 
-## Thêm một module mới (ví dụ `comments`)
+**Lưu ý khi dùng API miễn phí**
 
-1. `types/comment.types.ts`: khai báo kiểu dữ liệu, export trong `types/index.ts`.
-2. `services/comment.service.ts`: các hàm gọi API, export trong `services/index.ts`.
-3. `hooks/useComments.ts`: logic và state, export trong `hooks/index.ts`.
-4. `components/comments/`: component + `index.ts`.
-5. Thêm route trong `app/` nếu cần trang riêng.
+- Gói miễn phí có giới hạn số lần gọi mỗi phút/ngày, nên chỉ gọi AI khi cần: tạo báo cáo khi bấm nút hoặc cuối tuần, kiểm tra trùng khi có issue mới. Giới hạn cụ thể xem trong Google AI Studio, vì thay đổi theo thời gian.
+- Theo trang giá của Google, nội dung gửi qua gói miễn phí có thể được dùng để cải thiện sản phẩm của họ. Vì vậy chỉ nên dùng repo demo hoặc repo công khai, không gửi issue của repo riêng tư (ví dụ dự án ở công ty).
+- Embedding dùng cho bước lọc trong tính năng phát hiện issue trùng (biến nội dung issue thành dãy số để database so sánh). Chưa xác nhận được gói miễn phí hiện tại của Gemini cho phần này, cần kiểm tra lại khi bắt đầu làm. Phương án dự phòng miễn phí hoàn toàn là chạy một model embedding nhỏ ngay trên server NestJS (ví dụ qua thư viện Transformers.js).
 
-## API backend mà frontend đang gọi
+## Công nghệ dự kiến
 
-Backend (NestJS) cần cung cấp các endpoint sau. Lỗi trả về dạng `{ "message": "..." }`.
+Toàn bộ dùng TypeScript.
 
-| Method | Đường dẫn                                     | Mục đích                                                               |
-| ------ | --------------------------------------------- | ---------------------------------------------------------------------- |
-| GET    | `/auth/github`                                | Bắt đầu OAuth GitHub (chuyển hướng), xong thì set cookie               |
-| GET    | `/auth/me`                                    | Người dùng hiện tại (401 nếu chưa đăng nhập)                           |
-| POST   | `/auth/logout`                                | Đăng xuất                                                              |
-| GET    | `/repositories`                               | Repository của người dùng, kèm `isConnected`                           |
-| GET    | `/repositories/:repoId`                       | Chi tiết một repository                                                |
-| POST   | `/repositories/:repoId/connect`               | Kết nối repository (lấy issue cũ, đăng ký webhook)                     |
-| GET    | `/repositories/:repoId/issues`                | Toàn bộ issue của repository                                           |
-| GET    | `/repositories/:repoId/issues/:number`        | Chi tiết một issue                                                     |
-| POST   | `/repositories/:repoId/issues`                | Tạo issue (tạo trên GitHub rồi lưu bản sao)                            |
-| PATCH  | `/repositories/:repoId/issues/:number`        | Sửa tiêu đề, mô tả, nhãn                                               |
-| PATCH  | `/repositories/:repoId/issues/:number/status` | Đổi cột Kanban, body `{ "status": "todo" \| "in_progress" \| "done" }` |
-| GET    | `/repositories/:repoId/dashboard?weekStart=`  | Thống kê theo tuần                                                     |
-| GET    | `/repositories/:repoId/ai/weekly-summary`     | Báo cáo tuần gần nhất (404 nếu chưa có)                                |
-| POST   | `/repositories/:repoId/ai/weekly-summary`     | Tạo báo cáo tuần mới bằng LLM                                          |
-| POST   | `/repositories/:repoId/ai/duplicate-check`    | Kiểm tra issue trùng, body `{ title, body? }`                          |
+**Giao diện (web)**
 
-Kiểu dữ liệu của request và response nằm trong `src/types/`.
+- Next.js + Tailwind CSS
+- dnd-kit (kéo-thả thẻ trên bảng Kanban)
+- Recharts (biểu đồ dashboard)
+- socket.io-client (nhận cập nhật realtime)
 
-### Socket.io
+**Backend**
 
-Client gửi `repo:subscribe` / `repo:unsubscribe` (kèm `repoId`) để vào / rời phòng của repository. Server đẩy xuống:
+- NestJS (chia module: Auth, đồng bộ GitHub, Board, AI, Socket Gateway)
+- Octokit (`octokit`, `@octokit/webhooks`) để gọi GitHub API và xác thực webhook
+- Socket.io để đẩy cập nhật realtime tới các trình duyệt đang mở
 
-- `issue:created` và `issue:updated`, dữ liệu `{ repoId, issue }`
-- `issue:deleted`, dữ liệu `{ repoId, number }`
+**Database**
 
-Tên sự kiện định nghĩa trong `src/constants/socket-events.ts`.
+- PostgreSQL + pgvector (lưu embedding phục vụ phát hiện issue trùng)
+- Prisma để tạo bảng và truy vấn; phần so sánh vector viết SQL thô
+- Dùng Supabase hoặc Neon chỉ làm nơi chứa database (không dùng làm backend)
 
-### Lưu ý khi nối với backend
+**AI**
 
-- Frontend gửi cookie đăng nhập (`credentials: "include"`), nên backend phải bật CORS với `credentials: true` và chỉ định đúng origin của frontend (không dùng `*`). Socket.io cũng cần cấu hình CORS tương tự.
-- Sau khi đăng nhập GitHub thành công, backend set cookie `httpOnly` rồi chuyển hướng về `http://localhost:3000/repositories`.
+- LLM: Gemini API gói miễn phí (dòng Flash hoặc Flash-Lite)
+- Embedding: embedding của Gemini hoặc model chạy cục bộ (xem lưu ý ở trên)
+
+**Triển khai demo (miễn phí)**
+
+- Giao diện: Vercel
+- NestJS: Render hoặc Railway
+- Database: Supabase hoặc Neon
+- Khi code trên máy: dùng smee.io hoặc ngrok để GitHub gửi webhook về `localhost`
+
+## Kiến thức cần tìm hiểu (theo đề cương)
+
+- Lý thuyết quản lý dự án phát triển phần mềm
+- Các khái niệm Git và GitHub (Repository, Issue, GitHub REST API, Webhook, cơ chế đồng bộ dữ liệu 2 chiều)
+- Kiến thức phát triển ứng dụng web (Client-Server, RESTful API, HTTP/HTTPS)
+- Lý thuyết về Kanban và thiết kế giao diện
+- LLM và AI Text Summarization
+
+## Phạm vi
+
+Chỉ làm việc với **Issues** của GitHub, không đụng tới Pull Request/merge code — phù hợp với cách team nhỏ thường làm việc (mỗi người 1 branch, 1 người merge tay).
