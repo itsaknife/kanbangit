@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GitHub Task Board",
+  title: "Kanbangit",
   description: "Quản lý công việc nhóm phát triển phần mềm, đồng bộ với GitHub Issues",
 };
 

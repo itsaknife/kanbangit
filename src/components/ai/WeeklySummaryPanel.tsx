@@ -1,13 +1,15 @@
 "use client";
 
 import { Button, Card, ErrorMessage, Spinner } from "@/components/ui";
-import { useRepoId, useWeeklySummary } from "@/hooks";
+import { useRepoId, useRepository, useWeeklySummary } from "@/hooks";
 import { formatDateRange, formatDateTime, getErrorMessage } from "@/utils";
 
 /** Báo cáo tiến độ tuần do AI (LLM) viết từ dữ liệu issue của repository. */
 export function WeeklySummaryPanel() {
   const repoId = useRepoId();
   const { summary, loading, error, generating, generateError, generate } = useWeeklySummary(repoId);
+  const { repository } = useRepository(repoId);
+  const canGenerate = repository?.canManage ?? false;
 
   let body;
   if (loading) {
@@ -19,7 +21,9 @@ export function WeeklySummaryPanel() {
   } else {
     body = (
       <p className="text-sm text-zinc-500">
-        Chưa có báo cáo nào. Bấm &quot;Tạo báo cáo mới&quot; để AI tổng hợp tiến độ của nhóm.
+        {canGenerate
+          ? 'Chưa có báo cáo nào. Bấm "Tạo báo cáo mới" để AI tổng hợp tiến độ của nhóm.'
+          : "Chưa có báo cáo nào. Owner của repository sẽ tạo báo cáo."}
       </p>
     );
   }
@@ -36,9 +40,11 @@ export function WeeklySummaryPanel() {
             </p>
           )}
         </div>
-        <Button size="sm" loading={generating} onClick={generate}>
-          Tạo báo cáo mới
-        </Button>
+        {canGenerate && (
+          <Button size="sm" loading={generating} onClick={generate}>
+            Tạo báo cáo mới
+          </Button>
+        )}
       </div>
 
       {body}

@@ -60,6 +60,7 @@ export function IssueDetail() {
             title: issue.title,
             body: issue.body ?? "",
             label: getStandardLabel(issue),
+            assignees: issue.assignees.map((person) => person.login),
           }}
           onCancel={() => setEditing(false)}
           onSubmit={async (payload) => {

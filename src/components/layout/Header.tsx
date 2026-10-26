@@ -12,7 +12,7 @@ export function Header() {
     <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
         <Link href={ROUTES.repositories} className="font-semibold">
-          GitHub Task Board
+          Kanbangit
         </Link>
 
         {user && (

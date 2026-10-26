@@ -1,3 +1,4 @@
+export * from "./useAssignees";
 export * from "./useAsync";
 export * from "./useAuth";
 export * from "./useBoard";

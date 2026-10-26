@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Badge, Button, buttonClassName, Card } from "@/components/ui";
 import { ROUTES } from "@/constants";
-import type { Repository } from "@/types";
+import type { Repository } from "@/types/repository.types";
 
 interface RepositoryCardProps {
   repository: Repository;
@@ -24,10 +24,22 @@ export function RepositoryCard({ repository, connecting, onConnect }: Repository
       </div>
 
       {repository.isConnected ? (
-        <Link href={ROUTES.board(repository.id)} className={buttonClassName({ size: "sm" })}>
-          Mở bảng
-        </Link>
-      ) : (
+        <div className="flex shrink-0 items-center gap-2">
+          {repository.canManage && (
+            <Button
+              size="sm"
+              variant="secondary"
+              loading={connecting}
+              onClick={() => onConnect(repository.id)}
+            >
+              Đồng bộ lại
+            </Button>
+          )}
+          <Link href={ROUTES.board(repository.id)} className={buttonClassName({ size: "sm" })}>
+            Mở bảng
+          </Link>
+        </div>
+      ) : repository.canManage ? (
         <Button
           size="sm"
           variant="secondary"
@@ -36,6 +48,9 @@ export function RepositoryCard({ repository, connecting, onConnect }: Repository
         >
           Kết nối
         </Button>
+      ) : (
+        // Chỉ owner (admin repo trên GitHub) mới được kết nối
+        <span className="shrink-0 text-xs text-zinc-500">Chờ owner kết nối</span>
       )}
     </Card>
   );

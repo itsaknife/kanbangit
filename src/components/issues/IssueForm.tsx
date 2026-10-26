@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Button, Input, Select, Textarea } from "@/components/ui";
 import { STANDARD_LABELS } from "@/constants";
-import { useDuplicateCheck, useRepoId } from "@/hooks";
+import { useAssignees, useDuplicateCheck, useRepoId } from "@/hooks";
 import type { CreateIssuePayload } from "@/types";
 import { getErrorMessage } from "@/utils";
 import { DuplicateWarning } from "./DuplicateWarning";
@@ -13,6 +13,8 @@ interface IssueFormValues {
   body: string;
   /** Tên nhãn chuẩn đã chọn, "" nếu không gắn nhãn. */
   label: string;
+  /** Tên tài khoản GitHub của những người được giao. */
+  assignees: string[];
 }
 
 interface IssueFormProps {
@@ -42,13 +44,24 @@ export function IssueForm({
     title: "",
     body: "",
     label: "",
+    assignees: [],
     ...initialValues,
   });
+  const { assignees: assigneeOptions, loading: assigneesLoading } = useAssignees(repoId);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { result, checking, check, reset } = useDuplicateCheck(repoId);
 
-  const updateValue = (key: keyof IssueFormValues, value: string) => {
+  const toggleAssignee = (login: string) => {
+    setValues((current) => ({
+      ...current,
+      assignees: current.assignees.includes(login)
+        ? current.assignees.filter((item) => item !== login)
+        : [...current.assignees, login],
+    }));
+  };
+
+  const updateValue = (key: "title" | "body" | "label", value: string) => {
     setValues((current) => ({ ...current, [key]: value }));
     reset(); // nội dung đã đổi nên kết quả kiểm tra trùng cũ không còn đúng
   };
@@ -57,6 +70,7 @@ export function IssueForm({
     title: values.title.trim(),
     body: values.body.trim() || undefined,
     labels: values.label ? [values.label] : [],
+    assignees: values.assignees,
   });
 
   const submit = async () => {
@@ -113,6 +127,31 @@ export function IssueForm({
         value={values.label}
         onChange={(event) => updateValue("label", event.target.value)}
       />
+
+      <fieldset className="flex flex-col gap-1">
+        <legend className="text-sm font-medium">Người thực hiện</legend>
+        {assigneesLoading ? (
+          <p className="text-sm text-zinc-500">Đang tải danh sách...</p>
+        ) : assigneeOptions.length === 0 ? (
+          <p className="text-sm text-zinc-500">Repository chưa có người nào để giao việc.</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {assigneeOptions.map((person) => (
+              <label
+                key={person.login}
+                className="flex cursor-pointer items-center gap-2 rounded-md border border-zinc-300 px-2 py-1 text-sm dark:border-zinc-700"
+              >
+                <input
+                  type="checkbox"
+                  checked={values.assignees.includes(person.login)}
+                  onChange={() => toggleAssignee(person.login)}
+                />
+                {person.login}
+              </label>
+            ))}
+          </div>
+        )}
+      </fieldset>
 
       {duplicates.length > 0 && (
         <DuplicateWarning
