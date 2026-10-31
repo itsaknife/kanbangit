@@ -10,7 +10,7 @@ Team dev nhỏ thường quản lý task qua GitHub Issues, nhưng giao diện k
 
 ## Chức năng chính
 
-Ứng dụng web gồm các chức năng sau (theo đề cương):
+Ứng dụng web gồm các chức năng sau:
 
 1. **Đăng nhập và kết nối GitHub:** đăng nhập bằng tài khoản GitHub, chọn repository cần theo dõi.
 2. **Quản lý Issue:** xem danh sách, xem chi tiết, tạo mới, chỉnh sửa. Issue tạo hoặc sửa trên app sẽ cập nhật sang GitHub, và ngược lại.
