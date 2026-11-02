@@ -1,9 +1,12 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
 import { Badge, Card } from "@/components/ui";
-import { ROUTES, STATUS_TITLES } from "@/constants";
+import { STATUS_STYLES, STATUS_TITLES } from "@/constants";
 import type { Issue } from "@/types";
-import { formatDate } from "@/utils";
+import { cn, formatDate } from "@/utils";
 import { AssigneeAvatars } from "./AssigneeAvatars";
+import { IssueEditDialog } from "./IssueEditDialog";
 import { IssueLabels } from "./IssueLabels";
 
 interface IssueItemProps {
@@ -12,27 +15,42 @@ interface IssueItemProps {
 }
 
 export function IssueItem({ issue, repoId }: IssueItemProps) {
+  const [open, setOpen] = useState(false);
   return (
-    <Card className="flex items-center justify-between gap-4 p-3">
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-zinc-500">#{issue.number}</span>
-          <Link
-            href={ROUTES.issueDetail(repoId, issue.number)}
-            className="truncate font-medium hover:underline"
-          >
-            {issue.title}
-          </Link>
+    <>
+      <Card
+        className={cn(
+          "group flex items-center justify-between gap-5 p-4 transition-shadow hover:shadow-md",
+        )}
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start gap-3">
+            <span className="pt-0.5 text-sm text-muted-foreground">#{issue.number}</span>
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="truncate text-left font-semibold transition-colors group-hover:text-primary hover:underline"
+            >
+              {issue.title}
+            </button>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2 pl-7">
+            <IssueLabels labels={issue.labels} />
+            <span className="text-xs text-muted-foreground">
+              {issue.dueDate ? `Đến hạn vào ${formatDate(issue.dueDate)}` : "Chưa có ngày đến hạn"}
+            </span>
+          </div>
         </div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-2">
-          <IssueLabels labels={issue.labels} />
-          <span className="text-xs text-zinc-500">Cập nhật {formatDate(issue.updatedAt)}</span>
+        <div className="flex items-center gap-3">
+          <Badge className={cn("border", STATUS_STYLES[issue.status].badge)}>
+            {STATUS_TITLES[issue.status]}
+          </Badge>
+          <AssigneeAvatars assignees={issue.assignees} />
         </div>
-      </div>
-      <div className="flex items-center gap-3">
-        <Badge>{STATUS_TITLES[issue.status]}</Badge>
-        <AssigneeAvatars assignees={issue.assignees} />
-      </div>
-    </Card>
+      </Card>
+      {open && (
+        <IssueEditDialog issue={issue} repoId={repoId} open onClose={() => setOpen(false)} />
+      )}
+    </>
   );
 }

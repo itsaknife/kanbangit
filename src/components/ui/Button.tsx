@@ -6,12 +6,11 @@ type Variant = "primary" | "secondary" | "danger" | "ghost";
 type Size = "sm" | "md";
 
 const variantClasses: Record<Variant, string> = {
-  primary: "bg-blue-600 text-white hover:bg-blue-700",
+  primary: "bg-primary text-primary-foreground hover:bg-primary/90",
   secondary:
-    "border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 " +
-    "dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800",
-  danger: "bg-red-600 text-white hover:bg-red-700",
-  ghost: "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
+    "border bg-background text-foreground hover:bg-accent hover:text-accent-foreground",
+  danger: "bg-destructive text-white hover:bg-destructive/90",
+  ghost: "text-foreground hover:bg-accent hover:text-accent-foreground",
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -25,7 +24,7 @@ export function buttonClassName({
   size = "md",
 }: { variant?: Variant; size?: Size } = {}): string {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors",
+    "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     "disabled:cursor-not-allowed disabled:opacity-60",
     variantClasses[variant],
     sizeClasses[size],

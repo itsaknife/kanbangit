@@ -1,16 +1,14 @@
 "use client";
-
-import { repositoryService } from "@/services";
-import { useAsync } from "./useAsync";
-
-/** Danh sách repository của người dùng và thao tác kết nối repository. */
+import { useEffect } from "react";
+import { useRepositoriesStore } from "@/stores";
 export function useRepositories() {
-  const { data, loading, error, reload, setData } = useAsync(() => repositoryService.list(), []);
-
-  const connect = async (repoId: number) => {
-    const updated = await repositoryService.connect(repoId);
-    setData((list) => list?.map((repo) => (repo.id === repoId ? updated : repo)));
-  };
-
-  return { repositories: data ?? [], loading, error, reload, connect };
+  const repositories = useRepositoriesStore((state) => state.repositories);
+  const loading = useRepositoriesStore((state) => state.loading);
+  const error = useRepositoriesStore((state) => state.error);
+  const fetchRepositories = useRepositoriesStore((state) => state.fetchRepositories);
+  const connect = useRepositoriesStore((state) => state.connectRepository);
+  useEffect(() => {
+    if (!repositories.length && !loading) void fetchRepositories();
+  }, [repositories.length, loading, fetchRepositories]);
+  return { repositories, loading, error, reload: fetchRepositories, connect };
 }

@@ -7,10 +7,11 @@ import { formatDateRange, getErrorMessage } from "@/utils";
 import { MemberWorkloadChart } from "./MemberWorkloadChart";
 import { StatCard } from "./StatCard";
 import { WeeklyClosedChart } from "./WeeklyClosedChart";
+import { DateRangePicker } from "./DateRangePicker";
 
 export function DashboardOverview() {
   const repoId = useRepoId();
-  const { stats, loading, error, reload, goPrevWeek, goNextWeek, goCurrentWeek } =
+  const { stats, loading, error, reload, goPrevWeek, goNextWeek, goCurrentWeek, selectWeek } =
     useDashboard(repoId);
 
   if (loading) {
@@ -30,7 +31,12 @@ export function DashboardOverview() {
         <h2 className="text-lg font-semibold">
           Tuần {formatDateRange(stats.weekStart, stats.weekEnd)}
         </h2>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-end justify-end gap-2">
+          <DateRangePicker
+            startDate={stats.weekStart}
+            endDate={stats.weekEnd}
+            onChange={({ startDate }) => selectWeek(startDate)}
+          />
           <Button variant="secondary" size="sm" onClick={goPrevWeek}>
             ← Tuần trước
           </Button>

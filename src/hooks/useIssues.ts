@@ -1,63 +1,38 @@
 "use client";
-
-import { useState } from "react";
 import { SOCKET_EVENTS } from "@/constants";
-import { issueService } from "@/services";
-import type {
-  CreateIssuePayload,
-  Issue,
-  IssueDeletedPayload,
-  IssueEventPayload,
-  IssueStatus,
-} from "@/types";
-import { getErrorMessage, removeIssue, upsertIssue } from "@/utils";
-import { useAsync } from "./useAsync";
+import { useEffect } from "react";
+import { useIssuesStore } from "@/stores";
+import type { IssueDeletedPayload, IssueEventPayload } from "@/types";
 import { useRepoRoom } from "./useRepoRoom";
 import { useSocketEvent } from "./useSocketEvent";
-
-/** Danh sách issue của một repository, tự cập nhật realtime qua Socket.io. */
 export function useIssues(repoId: number) {
-  const { data, loading, error, reload, setData } = useAsync(
-    () => issueService.list(repoId),
-    [repoId],
-  );
-  const [actionError, setActionError] = useState<string | null>(null);
-
+  const state = useIssuesStore((store) => store.byRepository[repoId]);
+  const fetchIssues = useIssuesStore((store) => store.fetchIssues);
+  const applyIssue = useIssuesStore((store) => store.applyIssue);
+  const removeIssue = useIssuesStore((store) => store.removeIssue);
+  const createIssue = useIssuesStore((store) => store.createIssue);
+  const moveIssue = useIssuesStore((store) => store.moveIssue);
+  useEffect(() => {
+    if (!state) void fetchIssues(repoId);
+  }, [state, repoId, fetchIssues]);
   useRepoRoom(repoId);
-
-  const applyIssueEvent = ({ repoId: eventRepoId, issue }: IssueEventPayload) => {
-    if (eventRepoId === repoId) setData((list) => upsertIssue(list ?? [], issue));
-  };
-  useSocketEvent<IssueEventPayload>(SOCKET_EVENTS.issueCreated, applyIssueEvent);
-  useSocketEvent<IssueEventPayload>(SOCKET_EVENTS.issueUpdated, applyIssueEvent);
-  useSocketEvent<IssueDeletedPayload>(SOCKET_EVENTS.issueDeleted, (payload) => {
-    if (payload.repoId === repoId) setData((list) => removeIssue(list ?? [], payload.number));
+  useSocketEvent<IssueEventPayload>(SOCKET_EVENTS.issueCreated, ({ repoId: id, issue }) => {
+    if (id === repoId) applyIssue(repoId, issue);
   });
-
-  const createIssue = async (payload: CreateIssuePayload): Promise<Issue> => {
-    const issue = await issueService.create(repoId, payload);
-    setData((list) => upsertIssue(list ?? [], issue));
-    return issue;
+  useSocketEvent<IssueEventPayload>(SOCKET_EVENTS.issueUpdated, ({ repoId: id, issue }) => {
+    if (id === repoId) applyIssue(repoId, issue);
+  });
+  useSocketEvent<IssueDeletedPayload>(SOCKET_EVENTS.issueDeleted, ({ repoId: id, number }) => {
+    if (id === repoId) removeIssue(repoId, number);
+  });
+  return {
+    issues: state?.issues ?? [],
+    loading: state?.loading ?? false,
+    error: state?.error ?? null,
+    reload: () => fetchIssues(repoId),
+    createIssue: (payload: Parameters<typeof createIssue>[1]) => createIssue(repoId, payload),
+    changeStatus: (issueNumber: number, status: Parameters<typeof moveIssue>[2]) =>
+      moveIssue(repoId, issueNumber, status),
+    actionError: state?.actionError ?? null,
   };
-
-  /** Đổi cột của issue: cập nhật giao diện ngay, nếu server báo lỗi thì trả về trạng thái cũ. */
-  const changeStatus = async (issueNumber: number, status: IssueStatus) => {
-    const previous = data?.find((issue) => issue.number === issueNumber);
-    if (!previous || previous.status === status) return;
-
-    setActionError(null);
-    setData((list) =>
-      list?.map((issue) => (issue.number === issueNumber ? { ...issue, status } : issue)),
-    );
-
-    try {
-      const updated = await issueService.updateStatus(repoId, issueNumber, status);
-      setData((list) => upsertIssue(list ?? [], updated));
-    } catch (err) {
-      setData((list) => list?.map((issue) => (issue.number === issueNumber ? previous : issue)));
-      setActionError(getErrorMessage(err));
-    }
-  };
-
-  return { issues: data ?? [], loading, error, reload, createIssue, changeStatus, actionError };
 }

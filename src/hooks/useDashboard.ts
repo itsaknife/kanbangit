@@ -29,5 +29,9 @@ export function useDashboard(repoId: number) {
     goPrevWeek: () => setWeekStart((current) => addWeeks(current, -1)),
     goNextWeek: () => setWeekStart((current) => addWeeks(current, 1)),
     goCurrentWeek: () => setWeekStart(getWeekStart()),
+    selectWeek: (date: string) => {
+      if (!date) return;
+      setWeekStart(getWeekStart(new Date(`${date}T12:00:00`)));
+    },
   };
 }

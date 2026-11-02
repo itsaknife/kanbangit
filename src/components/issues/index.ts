@@ -2,6 +2,8 @@ export * from "./AssigneeAvatars";
 export * from "./CreateIssueModal";
 export * from "./DuplicateWarning";
 export * from "./IssueDetail";
+export * from "./IssueEditDialog";
+export * from "./DueDatePicker";
 export * from "./IssueFilterBar";
 export * from "./IssueForm";
 export * from "./IssueItem";

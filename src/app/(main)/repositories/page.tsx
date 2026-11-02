@@ -1,5 +1,7 @@
 import { RepositoryList } from "@/components/repositories";
 
+export const instant = false;
+
 export default function RepositoriesPage() {
   return (
     <section className="flex flex-col gap-4">

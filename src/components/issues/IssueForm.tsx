@@ -1,37 +1,36 @@
 "use client";
-
 import { useState, type FormEvent } from "react";
-import { Button, Input, Select, Textarea } from "@/components/ui";
+import { Avatar, Button, Input, Select, Textarea } from "@/components/ui";
+import { UserRound } from "lucide-react";
 import { STANDARD_LABELS } from "@/constants";
 import { useAssignees, useDuplicateCheck, useRepoId } from "@/hooks";
 import type { CreateIssuePayload } from "@/types";
 import { getErrorMessage } from "@/utils";
 import { DuplicateWarning } from "./DuplicateWarning";
-
+import { DueDatePicker } from "./DueDatePicker";
+import { IssueLabelIcon } from "./IssueLabelIcon";
 interface IssueFormValues {
   title: string;
   body: string;
-  /** Tên nhãn chuẩn đã chọn, "" nếu không gắn nhãn. */
   label: string;
-  /** Tên tài khoản GitHub của những người được giao. */
   assignees: string[];
+  dueDate: string;
 }
-
 interface IssueFormProps {
   initialValues?: Partial<IssueFormValues>;
   submitLabel: string;
-  /** Bật để AI kiểm tra trùng lặp trước khi gửi (dùng khi tạo issue mới). */
   checkDuplicate?: boolean;
   onSubmit: (payload: CreateIssuePayload) => Promise<void>;
   onCancel: () => void;
 }
-
 const LABEL_OPTIONS = [
-  { value: "", label: "Không gắn nhãn" },
-  ...STANDARD_LABELS.map((label) => ({ value: label.name, label: label.title })),
+  { value: "", label: "No label" },
+  ...STANDARD_LABELS.map((label) => ({
+    value: label.name,
+    label: label.title,
+    icon: <IssueLabelIcon name={label.name} />,
+  })),
 ];
-
-/** Form dùng chung cho tạo mới và chỉnh sửa issue. */
 export function IssueForm({
   initialValues,
   submitLabel,
@@ -45,34 +44,27 @@ export function IssueForm({
     body: "",
     label: "",
     assignees: [],
+    dueDate: "",
     ...initialValues,
   });
-  const { assignees: assigneeOptions, loading: assigneesLoading } = useAssignees(repoId);
+  const { assignees, loading: assigneesLoading } = useAssignees(repoId);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { result, checking, check, reset } = useDuplicateCheck(repoId);
-
-  const toggleAssignee = (login: string) => {
-    setValues((current) => ({
-      ...current,
-      assignees: current.assignees.includes(login)
-        ? current.assignees.filter((item) => item !== login)
-        : [...current.assignees, login],
-    }));
-  };
-
-  const updateValue = (key: "title" | "body" | "label", value: string) => {
+  const updateValue = (
+    key: keyof Pick<IssueFormValues, "title" | "body" | "label" | "dueDate">,
+    value: string,
+  ) => {
     setValues((current) => ({ ...current, [key]: value }));
-    reset(); // nội dung đã đổi nên kết quả kiểm tra trùng cũ không còn đúng
+    reset();
   };
-
   const buildPayload = (): CreateIssuePayload => ({
     title: values.title.trim(),
     body: values.body.trim() || undefined,
     labels: values.label ? [values.label] : [],
     assignees: values.assignees,
+    dueDate: values.dueDate || null,
   });
-
   const submit = async () => {
     setSubmitting(true);
     setError(null);
@@ -84,7 +76,6 @@ export function IssueForm({
       setSubmitting(false);
     }
   };
-
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!values.title.trim()) {
@@ -92,67 +83,66 @@ export function IssueForm({
       return;
     }
     setError(null);
-
     if (checkDuplicate) {
       const payload = buildPayload();
       const duplicateResult = await check({ title: payload.title, body: payload.body });
-      if (duplicateResult?.isDuplicate) return; // hiện cảnh báo, chờ người dùng quyết định
+      if (duplicateResult?.isDuplicate) return;
     }
     await submit();
   };
-
   const duplicates = result?.isDuplicate ? result.candidates : [];
-
+  const assigneeOptions = [
+    {
+      value: "",
+      label: "Chưa được giao",
+      icon: <UserRound className="h-4 w-4 text-muted-foreground" />,
+    },
+    ...assignees.map((person) => ({
+      value: person.login,
+      label: person.login,
+      icon: <Avatar src={person.avatarUrl} alt="" size={20} />,
+    })),
+  ];
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex min-h-[22rem] flex-col gap-6">
       <Input
-        label="Tiêu đề"
         name="title"
-        placeholder="Mô tả ngắn gọn công việc"
+        label=""
+        placeholder="Tiêu đề issue"
         value={values.title}
+        className="h-10 border-transparent bg-transparent px-0 text-base font-semibold shadow-none focus-visible:ring-0"
         onChange={(event) => updateValue("title", event.target.value)}
       />
       <Textarea
-        label="Mô tả"
         name="body"
+        label=""
         rows={6}
-        placeholder="Mô tả chi tiết: chuyện gì xảy ra, cần làm gì, tiêu chí hoàn thành..."
+        className="min-h-40 resize-y border-transparent bg-transparent px-0 text-base shadow-none focus-visible:ring-0"
+        placeholder="Thêm mô tả..."
         value={values.body}
         onChange={(event) => updateValue("body", event.target.value)}
       />
-      <Select
-        label="Nhãn"
-        name="label"
-        options={LABEL_OPTIONS}
-        value={values.label}
-        onChange={(event) => updateValue("label", event.target.value)}
-      />
-
-      <fieldset className="flex flex-col gap-1">
-        <legend className="text-sm font-medium">Người thực hiện</legend>
-        {assigneesLoading ? (
-          <p className="text-sm text-zinc-500">Đang tải danh sách...</p>
-        ) : assigneeOptions.length === 0 ? (
-          <p className="text-sm text-zinc-500">Repository chưa có người nào để giao việc.</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {assigneeOptions.map((person) => (
-              <label
-                key={person.login}
-                className="flex cursor-pointer items-center gap-2 rounded-md border border-zinc-300 px-2 py-1 text-sm dark:border-zinc-700"
-              >
-                <input
-                  type="checkbox"
-                  checked={values.assignees.includes(person.login)}
-                  onChange={() => toggleAssignee(person.login)}
-                />
-                {person.login}
-              </label>
-            ))}
-          </div>
-        )}
-      </fieldset>
-
+      <div className="flex flex-wrap items-center gap-2 border-t pt-5">
+        <Select
+          aria-label="Người thực hiện"
+          options={assigneeOptions}
+          value={values.assignees[0] ?? ""}
+          onChange={(nextValue) =>
+            setValues((current) => ({ ...current, assignees: nextValue ? [nextValue] : [] }))
+          }
+          disabled={assigneesLoading}
+          className="h-10 w-auto min-w-44 shrink-0 rounded-full border-border bg-secondary px-4"
+        />
+        <Select
+          aria-label="Nhãn"
+          name="label"
+          options={LABEL_OPTIONS}
+          value={values.label}
+          onChange={(nextValue) => updateValue("label", nextValue)}
+          className="h-10 w-auto min-w-32 shrink-0 rounded-full border-border bg-secondary px-4"
+        />
+        <DueDatePicker value={values.dueDate} onChange={(value) => updateValue("dueDate", value)} />
+      </div>
       {duplicates.length > 0 && (
         <DuplicateWarning
           candidates={duplicates}
@@ -161,9 +151,8 @@ export function IssueForm({
           onBack={reset}
         />
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
-      <div className="flex justify-end gap-2">
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <div className="flex justify-end gap-2 border-t pt-4">
         <Button variant="ghost" onClick={onCancel}>
           Hủy
         </Button>
