@@ -26,6 +26,9 @@ export interface Issue {
   createdAt: string;
   updatedAt: string;
   closedAt: string | null;
+  /** Thời điểm bắt đầu làm, do hệ thống Kanbangit quản lý. */
+  dueDate: string | null;
+  /** Thời điểm hoàn thành, do hệ thống Kanbangit quản lý. */
 }
 
 /** Bộ lọc dùng chung cho bảng Kanban và danh sách issue. "all" nghĩa là không lọc. */
@@ -33,6 +36,8 @@ export interface IssueFilters {
   search: string;
   label: string;
   assignee: string;
+  dueFrom: string;
+  dueTo: string;
 }
 
 export interface CreateIssuePayload {
@@ -40,6 +45,7 @@ export interface CreateIssuePayload {
   body?: string;
   labels?: string[];
   assignees?: string[];
+  dueDate?: string | null;
 }
 
 export type UpdateIssuePayload = Partial<CreateIssuePayload>;

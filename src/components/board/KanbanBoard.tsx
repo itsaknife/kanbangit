@@ -9,6 +9,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { CreateIssueModal, IssueFilterBar } from "@/components/issues";
 import { Button, ErrorMessage, Spinner } from "@/components/ui";
@@ -65,15 +66,22 @@ export function KanbanBoard() {
   if (error) return <ErrorMessage message={getErrorMessage(error)} onRetry={reload} />;
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <section className="-mx-4 flex min-h-[calc(100vh-9rem)] flex-col gap-4 rounded-2xl border border-border/70 bg-muted/35 p-4 shadow-sm dark:bg-zinc-900/60 lg:-mx-6 lg:p-5">
+      <div className="flex items-center justify-end gap-2 px-1">
         <IssueFilterBar
           value={filters}
           assignees={assignees}
           onChange={setFilters}
           onReset={resetFilters}
         />
-        <Button onClick={() => setCreating(true)}>Tạo issue</Button>
+        <Button
+          onClick={() => setCreating(true)}
+          className="h-10 w-10 rounded-xl p-0"
+          title="Tạo issue mới"
+          aria-label="Tạo issue mới"
+        >
+          <Plus className="h-8 w-8" strokeWidth={2.5} />
+        </Button>
       </div>
 
       {actionError && <ErrorMessage message={actionError} />}
@@ -86,7 +94,7 @@ export function KanbanBoard() {
         onDragEnd={handleDragEnd}
         onDragCancel={() => setActiveIssue(null)}
       >
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="flex gap-4 overflow-x-auto pb-2">
           {BOARD_COLUMNS.map((column) => (
             <BoardColumn
               key={column.status}

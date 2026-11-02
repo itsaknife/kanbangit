@@ -5,19 +5,21 @@ interface BadgeProps {
   children: ReactNode;
   /** Mã màu hex không có dấu #, hiển thị thành chấm tròn bên trái (dùng cho nhãn GitHub). */
   dotColor?: string;
+  icon?: ReactNode;
   className?: string;
 }
 
-export function Badge({ children, dotColor, className }: BadgeProps) {
+export function Badge({ children, dotColor, icon, className }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border border-zinc-200 px-2 py-0.5",
-        "text-xs font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300",
+        "inline-flex items-center gap-1.5 rounded-full border bg-secondary px-2 py-0.5",
+        "text-xs font-medium text-secondary-foreground",
         className,
       )}
     >
-      {dotColor && (
+      {icon}
+      {dotColor && !icon && (
         <span
           aria-hidden="true"
           className="h-2 w-2 rounded-full"

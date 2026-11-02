@@ -1,5 +1,5 @@
 /** Class dùng chung cho các ô nhập liệu (Input, Textarea, Select). */
 export const fieldClassName =
-  "w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none " +
-  "focus:border-blue-500 focus:ring-1 focus:ring-blue-500 " +
-  "dark:border-zinc-700 dark:bg-zinc-900";
+  "flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none " +
+  "placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring " +
+  "disabled:cursor-not-allowed disabled:opacity-50";

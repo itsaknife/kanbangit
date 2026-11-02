@@ -20,6 +20,9 @@ export function filterIssues(issues: Issue[], filters: IssueFilters): Issue[] {
     ) {
       return false;
     }
+    if (filters.dueFrom && (!issue.dueDate || issue.dueDate < filters.dueFrom)) return false;
+    if (filters.dueTo && (!issue.dueDate || issue.dueDate > `${filters.dueTo}T23:59:59`))
+      return false;
     return true;
   });
 }

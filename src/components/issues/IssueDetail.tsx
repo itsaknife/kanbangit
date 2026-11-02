@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ChangeEvent } from "react";
+import { useState } from "react";
 import {
   Button,
   buttonClassName,
@@ -41,10 +41,10 @@ export function IssueDetail() {
   if (error) return <ErrorMessage message={getErrorMessage(error)} />;
   if (!issue) return <EmptyState title="Không tìm thấy issue" />;
 
-  const handleStatusChange = async (event: ChangeEvent<HTMLSelectElement>) => {
+  const handleStatusChange = async (nextStatus: string) => {
     setStatusError(null);
     try {
-      await changeStatus(event.target.value as IssueStatus);
+      await changeStatus(nextStatus as IssueStatus);
     } catch (err) {
       setStatusError(getErrorMessage(err));
     }
