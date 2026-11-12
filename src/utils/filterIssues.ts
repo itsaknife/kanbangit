@@ -1,7 +1,7 @@
 import { ALL } from "@/constants";
 import type { Issue, IssueFilters } from "@/types";
 
-/** Lọc issue theo từ khóa (tiêu đề hoặc số #), nhãn và người được giao. */
+/** Lọc issue theo mã, tiêu đề, số GitHub, tracker và người được giao. */
 export function filterIssues(issues: Issue[], filters: IssueFilters): Issue[] {
   const keyword = filters.search.trim().toLowerCase().replace(/^#/, "");
 
@@ -9,9 +9,10 @@ export function filterIssues(issues: Issue[], filters: IssueFilters): Issue[] {
     if (keyword) {
       const matchTitle = issue.title.toLowerCase().includes(keyword);
       const matchNumber = String(issue.number) === keyword;
-      if (!matchTitle && !matchNumber) return false;
+      const matchCode = issue.issueCode.toLowerCase().includes(keyword);
+      if (!matchTitle && !matchNumber && !matchCode) return false;
     }
-    if (filters.label !== ALL && !issue.labels.some((label) => label.name === filters.label)) {
+    if (filters.trackerId !== ALL && issue.trackerId !== filters.trackerId) {
       return false;
     }
     if (

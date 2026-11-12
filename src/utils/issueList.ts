@@ -1,4 +1,3 @@
-import { STANDARD_LABELS } from "@/constants";
 import type { Issue } from "@/types";
 
 /** Thêm issue vào danh sách, hoặc thay thế nếu đã có (so theo số issue). */
@@ -19,10 +18,4 @@ export function getAssigneeLogins(issues: Issue[]): string[] {
     for (const assignee of issue.assignees) logins.add(assignee.login);
   }
   return [...logins].sort((a, b) => a.localeCompare(b));
-}
-
-/** Tên nhãn chuẩn (bug/enhancement/task) đầu tiên của issue, hoặc "" nếu không có. */
-export function getStandardLabel(issue: Issue): string {
-  const standardNames: readonly string[] = STANDARD_LABELS.map((label) => label.name);
-  return issue.labels.find((label) => standardNames.includes(label.name))?.name ?? "";
 }

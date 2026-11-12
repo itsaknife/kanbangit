@@ -3,13 +3,6 @@ import type { IssueFilters } from "@/types";
 /** Giá trị "không lọc" của các ô chọn. */
 export const ALL = "all";
 
-/** Bộ nhãn chuẩn mà hệ thống dùng cho mọi repository. */
-export const STANDARD_LABELS = [
-  { name: "bug", title: "bug" },
-  { name: "enhancement", title: "enhancement" },
-  { name: "task", title: "task" },
-] as const;
-
 export const STATUS_STYLES = {
   todo: {
     badge: "border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300",
@@ -30,7 +23,7 @@ export const STATUS_STYLES = {
 
 export const DEFAULT_ISSUE_FILTERS: IssueFilters = {
   search: "",
-  label: ALL,
+  trackerId: ALL,
   assignee: ALL,
   dueFrom: "",
   dueTo: "",

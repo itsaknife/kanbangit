@@ -6,7 +6,7 @@ import type { Repository } from "@/types/repository.types";
 interface RepositoryCardProps {
   repository: Repository;
   connecting: boolean;
-  onConnect: (repoId: number) => void;
+  onConnect: (repoId: string) => void;
 }
 
 export function RepositoryCard({ repository, connecting, onConnect }: RepositoryCardProps) {

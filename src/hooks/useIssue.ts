@@ -1,16 +1,19 @@
 "use client";
 
 import { SOCKET_EVENTS } from "@/constants";
-import { issueService } from "@/services";
+import { useIssuesStore } from "@/stores/issues.store";
 import type { IssueEventPayload, IssueStatus, UpdateIssuePayload } from "@/types";
 import { useAsync } from "./useAsync";
 import { useRepoRoom } from "./useRepoRoom";
 import { useSocketEvent } from "./useSocketEvent";
 
 /** Chi tiết một issue, kèm thao tác chỉnh sửa và đổi trạng thái. */
-export function useIssue(repoId: number, issueNumber: number) {
+export function useIssue(repoId: string, issueNumber: number) {
+  const loadIssue = useIssuesStore((s) => s.loadIssue);
+  const saveIssue = useIssuesStore((s) => s.updateIssue);
+  const saveStatus = useIssuesStore((s) => s.updateStatus);
   const { data, loading, error, setData } = useAsync(
-    () => issueService.getByNumber(repoId, issueNumber),
+    () => loadIssue(repoId, issueNumber),
     [repoId, issueNumber],
   );
 
@@ -20,12 +23,12 @@ export function useIssue(repoId: number, issueNumber: number) {
   });
 
   const updateIssue = async (payload: UpdateIssuePayload) => {
-    const updated = await issueService.update(repoId, issueNumber, payload);
+    const updated = await saveIssue(repoId, issueNumber, payload);
     setData(() => updated);
   };
 
   const changeStatus = async (status: IssueStatus) => {
-    const updated = await issueService.updateStatus(repoId, issueNumber, status);
+    const updated = await saveStatus(repoId, issueNumber, status);
     setData(() => updated);
   };
 

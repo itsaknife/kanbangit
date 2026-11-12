@@ -5,7 +5,7 @@ import { useIssuesStore } from "@/stores";
 import type { IssueDeletedPayload, IssueEventPayload } from "@/types";
 import { useRepoRoom } from "./useRepoRoom";
 import { useSocketEvent } from "./useSocketEvent";
-export function useIssues(repoId: number) {
+export function useIssues(repoId: string) {
   const state = useIssuesStore((store) => store.byRepository[repoId]);
   const fetchIssues = useIssuesStore((store) => store.fetchIssues);
   const applyIssue = useIssuesStore((store) => store.applyIssue);

@@ -7,11 +7,11 @@ import type { Issue } from "@/types";
 import { cn, formatDate } from "@/utils";
 import { AssigneeAvatars } from "./AssigneeAvatars";
 import { IssueEditDialog } from "./IssueEditDialog";
-import { IssueLabels } from "./IssueLabels";
+import { IssueTracker } from "./IssueTracker";
 
 interface IssueItemProps {
   issue: Issue;
-  repoId: number;
+  repoId: string;
 }
 
 export function IssueItem({ issue, repoId }: IssueItemProps) {
@@ -25,7 +25,7 @@ export function IssueItem({ issue, repoId }: IssueItemProps) {
       >
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-3">
-            <span className="pt-0.5 text-sm text-muted-foreground">#{issue.number}</span>
+            <span className="pt-0.5 text-sm text-muted-foreground">{issue.issueCode}</span>
             <button
               type="button"
               onClick={() => setOpen(true)}
@@ -35,7 +35,7 @@ export function IssueItem({ issue, repoId }: IssueItemProps) {
             </button>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2 pl-7">
-            <IssueLabels labels={issue.labels} />
+            <IssueTracker repoId={repoId} trackerId={issue.trackerId} />
             <span className="text-xs text-muted-foreground">
               {issue.dueDate ? `Đến hạn vào ${formatDate(issue.dueDate)}` : "Chưa có ngày đến hạn"}
             </span>

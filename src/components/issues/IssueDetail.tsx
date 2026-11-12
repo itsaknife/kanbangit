@@ -14,10 +14,10 @@ import {
 import { BOARD_COLUMNS, ROUTES } from "@/constants";
 import { useIssue, useIssueNumber, useRepoId } from "@/hooks";
 import type { IssueStatus } from "@/types";
-import { formatDateTime, getErrorMessage, getStandardLabel } from "@/utils";
+import { formatDateTime, getErrorMessage } from "@/utils";
 import { AssigneeAvatars } from "./AssigneeAvatars";
 import { IssueForm } from "./IssueForm";
-import { IssueLabels } from "./IssueLabels";
+import { IssueTracker } from "./IssueTracker";
 
 const STATUS_OPTIONS = BOARD_COLUMNS.map((column) => ({
   value: column.status,
@@ -57,9 +57,10 @@ export function IssueDetail() {
         <IssueForm
           submitLabel="Lưu thay đổi"
           initialValues={{
+            trackerId: issue.trackerId,
             title: issue.title,
             body: issue.body ?? "",
-            label: getStandardLabel(issue),
+            dueDate: issue.dueDate ? issue.dueDate.slice(0, 10) : "",
             assignees: issue.assignees.map((person) => person.login),
           }}
           onCancel={() => setEditing(false)}
@@ -80,7 +81,7 @@ export function IssueDetail() {
 
       <div className="flex items-start justify-between gap-4">
         <h2 className="text-xl font-semibold">
-          <span className="text-zinc-500">#{issue.number}</span> {issue.title}
+          <span className="text-zinc-500">{issue.issueCode}</span> {issue.title}
         </h2>
         <div className="flex shrink-0 gap-2">
           <a
@@ -104,7 +105,7 @@ export function IssueDetail() {
           value={issue.status}
           onChange={handleStatusChange}
         />
-        <IssueLabels labels={issue.labels} />
+        <IssueTracker repoId={repoId} trackerId={issue.trackerId} />
         <AssigneeAvatars assignees={issue.assignees} />
       </div>
       {statusError && <ErrorMessage message={statusError} />}

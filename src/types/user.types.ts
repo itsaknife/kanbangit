@@ -6,6 +6,6 @@ export interface UserSummary {
 
 /** Người dùng đang đăng nhập vào hệ thống. */
 export interface User extends UserSummary {
-  id: number;
+  id: string;
   name: string | null;
 }

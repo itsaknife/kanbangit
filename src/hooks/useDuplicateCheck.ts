@@ -5,7 +5,7 @@ import { aiService } from "@/services";
 import type { DuplicateCheckPayload, DuplicateCheckResult } from "@/types";
 
 /** Kiểm tra issue sắp tạo có trùng với issue cũ không (do AI nhận định). */
-export function useDuplicateCheck(repoId: number) {
+export function useDuplicateCheck(repoId: string) {
   const [result, setResult] = useState<DuplicateCheckResult | null>(null);
   const [checking, setChecking] = useState(false);
 
