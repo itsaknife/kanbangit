@@ -3,9 +3,9 @@
 import { useParams } from "next/navigation";
 
 /** Id repository lấy từ đường dẫn /repositories/[repoId]/... */
-export function useRepoId(): number {
+export function useRepoId(): string {
   const { repoId } = useParams<{ repoId: string }>();
-  return Number(repoId);
+  return repoId;
 }
 
 /** Số issue lấy từ đường dẫn /repositories/[repoId]/issues/[issueNumber] */

@@ -13,7 +13,9 @@ export interface IssueLabel {
 }
 
 export interface Issue {
-  id: number;
+  id: string;
+  issueCode: string;
+  trackerId: string;
   number: number;
   title: string;
   body: string | null;
@@ -34,13 +36,14 @@ export interface Issue {
 /** Bộ lọc dùng chung cho bảng Kanban và danh sách issue. "all" nghĩa là không lọc. */
 export interface IssueFilters {
   search: string;
-  label: string;
+  trackerId: string;
   assignee: string;
   dueFrom: string;
   dueTo: string;
 }
 
 export interface CreateIssuePayload {
+  trackerId: string;
   title: string;
   body?: string;
   labels?: string[];
@@ -52,12 +55,12 @@ export type UpdateIssuePayload = Partial<CreateIssuePayload>;
 
 /** Payload của socket event issue:created và issue:updated. */
 export interface IssueEventPayload {
-  repoId: number;
+  repoId: string;
   issue: Issue;
 }
 
 /** Payload của socket event issue:deleted. */
 export interface IssueDeletedPayload {
-  repoId: number;
+  repoId: string;
   number: number;
 }

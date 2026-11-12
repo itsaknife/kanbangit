@@ -1,10 +1,16 @@
 "use client";
-
-import { repositoryService } from "@/services";
-import { useAsync } from "./useAsync";
-
-/** Thông tin một repository (dùng cho tiêu đề trang). */
-export function useRepository(repoId: number) {
-  const { data, loading, error } = useAsync(() => repositoryService.getById(repoId), [repoId]);
-  return { repository: data, loading, error };
+import { useEffect } from "react";
+import { useRepositoriesStore } from "@/stores/repositories.store";
+export function useRepository(repoId: string) {
+  const entry = useRepositoriesStore((s) => s.details[repoId]);
+  const fetch = useRepositoriesStore((s) => s.fetchRepository);
+  useEffect(() => {
+    void fetch(repoId);
+  }, [repoId, fetch]);
+  return {
+    repository: entry?.data,
+    loading: !entry?.loaded,
+    error: entry?.error,
+    reload: () => fetch(repoId, true),
+  };
 }

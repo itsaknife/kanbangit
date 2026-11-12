@@ -17,6 +17,8 @@ export function RepoTabs() {
     { href: ROUTES.board(repoId), label: "Bảng Kanban" },
     { href: ROUTES.issues(repoId), label: "Danh sách issue" },
     { href: ROUTES.dashboard(repoId), label: "Dashboard" },
+    { href: `/repositories/${repoId}/members`, label: "Thành viên" },
+    { href: `/repositories/${repoId}/trackers`, label: "Trackers" },
   ];
 
   return (

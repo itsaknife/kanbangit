@@ -1,5 +1,5 @@
 export interface WeeklySummary {
-  id: number;
+  id: string;
   weekStart: string;
   weekEnd: string;
   /** Đoạn báo cáo do LLM viết. */

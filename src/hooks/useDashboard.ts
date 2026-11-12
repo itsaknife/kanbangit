@@ -9,7 +9,7 @@ import { useRepoRoom } from "./useRepoRoom";
 import { useSocketEvent } from "./useSocketEvent";
 
 /** Số liệu thống kê theo tuần, tự làm mới khi issue thay đổi. */
-export function useDashboard(repoId: number) {
+export function useDashboard(repoId: string) {
   const [weekStart, setWeekStart] = useState(() => getWeekStart());
   const { data, loading, error, reload } = useAsync(
     () => dashboardService.getStats(repoId, weekStart),

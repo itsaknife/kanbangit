@@ -1,8 +1,13 @@
+"use client";
+
 import { Button, Input, Popover, PopoverContent, PopoverTrigger, Select } from "@/components/ui";
 import { Filter } from "lucide-react";
-import { ALL, STANDARD_LABELS } from "@/constants";
+import { useEffect } from "react";
+import { ALL } from "@/constants";
+import { useRepoId } from "@/hooks";
+import { useTrackersStore } from "@/stores/trackers.store";
+import { TrackerIcon } from "@/components/repositories/TrackerIcon";
 import type { IssueFilters } from "@/types";
-import { IssueLabelIcon } from "./IssueLabelIcon";
 import { DateRangePicker } from "@/components/dashboard";
 
 interface IssueFilterBarProps {
@@ -13,19 +18,25 @@ interface IssueFilterBarProps {
   onReset: () => void;
 }
 
-/** Thanh tìm kiếm + lọc theo nhãn + lọc theo người được giao (dùng cho Kanban và danh sách issue). */
+/** Bộ lọc dùng chung cho Kanban và danh sách issue. */
 export function IssueFilterBar({ value, assignees, onChange, onReset }: IssueFilterBarProps) {
+  const repoId = useRepoId();
+  const trackerState = useTrackersStore((s) => s.byRepository[repoId]);
+  const fetchTrackers = useTrackersStore((s) => s.fetch);
+  useEffect(() => {
+    void fetchTrackers(repoId);
+  }, [repoId, fetchTrackers]);
   const activeFilterCount =
     Number(Boolean(value.search)) +
-    Number(value.label !== ALL) +
+    Number(value.trackerId !== ALL) +
     Number(value.assignee !== ALL) +
     Number(Boolean(value.dueFrom || value.dueTo));
-  const labelOptions = [
-    { value: ALL, label: "Tất cả nhãn" },
-    ...STANDARD_LABELS.map((label) => ({
-      value: label.name,
-      label: label.title,
-      icon: <IssueLabelIcon name={label.name} />,
+  const trackerOptions = [
+    { value: ALL, label: "Tất cả tracker" },
+    ...(trackerState?.items ?? []).map((tracker) => ({
+      value: tracker.id,
+      label: tracker.name + (tracker.isActive ? "" : " (Đã vô hiệu hóa)"),
+      icon: <TrackerIcon tracker={tracker} />,
     })),
   ];
   const assigneeOptions = [
@@ -62,16 +73,22 @@ export function IssueFilterBar({ value, assignees, onChange, onReset }: IssueFil
           <div className="flex flex-col gap-3 pt-3">
             <Input
               aria-label="Tìm kiếm issue"
-              placeholder="Tìm theo tiêu đề hoặc #số"
+              placeholder="Tìm theo mã Issue, tiêu đề hoặc #số"
               value={value.search}
               onChange={(event) => onChange({ ...value, search: event.target.value })}
             />
             <Select
-              aria-label="Lọc theo nhãn"
-              options={labelOptions}
-              value={value.label}
-              onChange={(nextValue) => onChange({ ...value, label: nextValue })}
+              label="Tracker"
+              aria-label="Lọc theo tracker"
+              options={trackerOptions}
+              value={value.trackerId}
+              onChange={(nextValue) => onChange({ ...value, trackerId: nextValue })}
             />
+            {trackerState?.error && (
+              <p role="alert" className="text-xs text-destructive">
+                {trackerState.error}
+              </p>
+            )}
             <div className="border-t pt-3">
               <DateRangePicker
                 startDate={value.dueFrom}
@@ -82,6 +99,7 @@ export function IssueFilterBar({ value, assignees, onChange, onReset }: IssueFil
               />
             </div>
             <Select
+              label="Người thực hiện"
               aria-label="Lọc theo người thực hiện"
               options={assigneeOptions}
               value={value.assignee}

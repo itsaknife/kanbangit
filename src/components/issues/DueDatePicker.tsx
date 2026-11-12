@@ -196,7 +196,8 @@ export function DueDatePicker({
       <PopoverTrigger asChild>
         <Button
           variant="secondary"
-          className="h-10 w-auto min-w-44 shrink-0 justify-start rounded-full border-border bg-secondary px-4"
+          aria-label="Hạn hoàn thành"
+          className="h-10 w-full justify-start font-normal shadow-sm"
         >
           <CalendarDays className="h-4 w-4" />
           {label}

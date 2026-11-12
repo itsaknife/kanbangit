@@ -2,11 +2,10 @@
 import { Modal } from "@/components/ui";
 import { useIssue } from "@/hooks";
 import type { Issue } from "@/types";
-import { getStandardLabel } from "@/utils";
 import { IssueForm } from "./IssueForm";
 interface IssueEditDialogProps {
   issue: Issue;
-  repoId: number;
+  repoId: string;
   open: boolean;
   onClose: () => void;
 }
@@ -16,9 +15,9 @@ export function IssueEditDialog({ issue, repoId, open, onClose }: IssueEditDialo
     <Modal open={open} title={`Chỉnh sửa issue #${issue.number}`} onClose={onClose}>
       <IssueForm
         initialValues={{
+          trackerId: issue.trackerId,
           title: issue.title,
           body: issue.body ?? "",
-          label: getStandardLabel(issue),
           assignees: issue.assignees.map((person) => person.login),
           dueDate: issue.dueDate ? issue.dueDate.slice(0, 10) : "",
         }}

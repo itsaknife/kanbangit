@@ -5,7 +5,7 @@ import { SOCKET_EVENTS } from "@/constants";
 let socket: Socket | null = null;
 
 /** Số component đang cần nhận dữ liệu của từng repository (để biết khi nào được rời phòng). */
-const roomUsers = new Map<number, number>();
+const roomUsers = new Map<string, number>();
 
 /** Lấy kết nối Socket.io dùng chung cho cả ứng dụng (tạo ở lần gọi đầu tiên). */
 export function getSocket(): Socket {
@@ -22,7 +22,7 @@ export function getSocket(): Socket {
 }
 
 /** Vào phòng của một repository để nhận cập nhật realtime. Trả về hàm để rời phòng. */
-export function joinRepoRoom(repoId: number): () => void {
+export function joinRepoRoom(repoId: string): () => void {
   const connection = getSocket();
   const users = roomUsers.get(repoId) ?? 0;
   roomUsers.set(repoId, users + 1);

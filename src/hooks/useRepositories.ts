@@ -7,8 +7,10 @@ export function useRepositories() {
   const error = useRepositoriesStore((state) => state.error);
   const fetchRepositories = useRepositoriesStore((state) => state.fetchRepositories);
   const connect = useRepositoriesStore((state) => state.connectRepository);
+  const loaded = useRepositoriesStore((state) => state.loaded);
+  const createRepository = useRepositoriesStore((state) => state.createRepository);
   useEffect(() => {
-    if (!repositories.length && !loading) void fetchRepositories();
-  }, [repositories.length, loading, fetchRepositories]);
-  return { repositories, loading, error, reload: fetchRepositories, connect };
+    if (!loaded && !loading) void fetchRepositories();
+  }, [loaded, loading, fetchRepositories]);
+  return { repositories, loading, error, reload: fetchRepositories, connect, createRepository };
 }

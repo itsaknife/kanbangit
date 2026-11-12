@@ -6,7 +6,7 @@ import type { WeeklySummary } from "@/types";
 import { getErrorMessage } from "@/utils";
 import { useAsync } from "./useAsync";
 
-async function fetchLatestSummary(repoId: number): Promise<WeeklySummary | null> {
+async function fetchLatestSummary(repoId: string): Promise<WeeklySummary | null> {
   try {
     return await aiService.getLatestSummary(repoId);
   } catch (error) {
@@ -17,7 +17,7 @@ async function fetchLatestSummary(repoId: number): Promise<WeeklySummary | null>
 }
 
 /** Báo cáo tiến độ tuần do AI viết: xem báo cáo gần nhất và yêu cầu tạo báo cáo mới. */
-export function useWeeklySummary(repoId: number) {
+export function useWeeklySummary(repoId: string) {
   const { data, loading, error, setData } = useAsync(() => fetchLatestSummary(repoId), [repoId]);
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
