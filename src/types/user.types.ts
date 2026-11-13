@@ -8,4 +8,6 @@ export interface UserSummary {
 export interface User extends UserSummary {
   id: string;
   name: string | null;
+  displayName: string | null;
+  customAvatarUrl: string | null;
 }

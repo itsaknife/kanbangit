@@ -6,9 +6,11 @@ import { authService } from "@/services";
 export function LoginCard() {
   const code = useSearchParams().get("error");
   const error = code
-    ? code === "invalid_state"
-      ? "Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Hãy thử lại."
-      : "GitHub chưa hoàn tất đăng nhập. Hãy thử lại và cấp quyền truy cập repository."
+    ? code === "session_expired"
+      ? "Phiên đăng nhập đã hết hạn hoặc quyền GitHub đã bị thu hồi. Vui lòng đăng nhập lại."
+      : code === "invalid_state"
+        ? "Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Hãy thử lại."
+        : "GitHub chưa hoàn tất đăng nhập. Hãy thử lại và cấp quyền truy cập repository."
     : null;
   return (
     <Card className="flex w-full max-w-sm flex-col items-center gap-4 p-8 text-center">

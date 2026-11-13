@@ -4,8 +4,16 @@ import { Button, Input, ErrorMessage, Modal } from "@/components/ui";
 import { useRepositoriesStore } from "@/stores";
 import { getErrorMessage } from "@/utils";
 
-export function CreateRepositoryForm() {
-  const [open, setOpen] = useState(false);
+export function CreateRepositoryForm({
+  initialOpen = false,
+  hideTrigger = false,
+  onClose,
+}: { initialOpen?: boolean; hideTrigger?: boolean; onClose?: () => void } = {}) {
+  const [open, setInternalOpen] = useState(initialOpen);
+  const setOpen = (next: boolean) => {
+    setInternalOpen(next);
+    if (!next) onClose?.();
+  };
   const createRepository = useRepositoriesStore((s) => s.createRepository);
   const reload = useRepositoriesStore((s) => s.fetchRepositories);
   const [name, setName] = useState("");
@@ -34,17 +42,19 @@ export function CreateRepositoryForm() {
   };
   return (
     <>
-      <div className="flex justify-end">
-        <Button
-          onClick={() => {
-            setError(null);
-            setSuccess(false);
-            setOpen(true);
-          }}
-        >
-          Tạo repository mới
-        </Button>
-      </div>
+      {!hideTrigger && (
+        <div className="flex justify-end">
+          <Button
+            onClick={() => {
+              setError(null);
+              setSuccess(false);
+              setOpen(true);
+            }}
+          >
+            Tạo repository mới
+          </Button>
+        </div>
+      )}
       {success && <p role="status">Đã tạo và kết nối repository.</p>}
       <Modal
         open={open}

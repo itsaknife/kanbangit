@@ -21,6 +21,24 @@ const client = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+let sessionExpiration: Promise<void> | undefined;
+
+async function expireSession(): Promise<void> {
+  if (typeof window === "undefined" || window.location.pathname === "/login") return;
+  sessionExpiration ??= (async () => {
+    try {
+      // Use the raw client to avoid recursively handling logout failures.
+      await client.post("/auth/logout", undefined, { timeout: 5000 });
+    } catch {
+      // Navigate even when the backend cannot clear its cookie.
+    } finally {
+      // Full navigation also discards authenticated stores and socket connections.
+      window.location.replace("/login?error=session_expired");
+    }
+  })();
+  await sessionExpiration;
+}
+
 /** NestJS trả lỗi dạng { message: string | string[] }. */
 function parseErrorMessage(data: unknown, fallback: string): string {
   const message = (data as { message?: unknown } | null)?.message;
@@ -47,6 +65,7 @@ async function request<T>(config: AxiosRequestConfig): Promise<T> {
     // Có phản hồi từ backend (401, 404, 500...): đổi thành ApiError để phần còn lại của app dùng thống nhất
     if (isAxiosError(error) && error.response) {
       const { status, statusText, data } = error.response;
+      if (status === 401 && config.url !== "/auth/logout") await expireSession();
       throw new ApiError(status, parseErrorMessage(data, statusText || "Yêu cầu thất bại"));
     }
     // Không có phản hồi (backend chưa chạy, mất mạng): giữ nguyên lỗi gốc
@@ -56,6 +75,8 @@ async function request<T>(config: AxiosRequestConfig): Promise<T> {
 
 /** Client gọi REST API của backend. Các service luôn gọi qua đây, không gọi axios trực tiếp. */
 export const http = {
+  upload: <T>(path: string, body: FormData) =>
+    request<T>({ method: "POST", url: path, data: body, headers: { "Content-Type": undefined } }),
   get: <T>(path: string, query?: Query) =>
     request<T>({ method: "GET", url: path, params: cleanQuery(query) }),
   post: <T>(path: string, body?: unknown) => request<T>({ method: "POST", url: path, data: body }),

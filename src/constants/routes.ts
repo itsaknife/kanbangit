@@ -5,6 +5,7 @@ export const ROUTES = {
   home: "/",
   login: "/login",
   repositories: "/repositories",
+  settings: "/settings",
   board: (repoId: Id) => `/repositories/${repoId}/board`,
   issues: (repoId: Id) => `/repositories/${repoId}/issues`,
   issueDetail: (repoId: Id, issueNumber: Id) => `/repositories/${repoId}/issues/${issueNumber}`,

@@ -12,6 +12,7 @@ export interface AuthContextValue {
   /** Lỗi khác 401 (ví dụ backend không phản hồi). */
   error: unknown;
   logout: () => Promise<void>;
+  updateUser: (user: User) => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -36,6 +37,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext value={{ user: data ?? null, loading, error, logout }}>{children}</AuthContext>
+    <AuthContext
+      value={{
+        user: data ?? null,
+        loading,
+        error,
+        logout,
+        updateUser: (user) => setData(() => user),
+      }}
+    >
+      {children}
+    </AuthContext>
   );
 }
