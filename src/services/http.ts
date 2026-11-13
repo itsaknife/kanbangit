@@ -80,6 +80,7 @@ export const http = {
   get: <T>(path: string, query?: Query) =>
     request<T>({ method: "GET", url: path, params: cleanQuery(query) }),
   post: <T>(path: string, body?: unknown) => request<T>({ method: "POST", url: path, data: body }),
+  put: <T>(path: string, body?: unknown) => request<T>({ method: "PUT", url: path, data: body }),
   patch: <T>(path: string, body?: unknown) =>
     request<T>({ method: "PATCH", url: path, data: body }),
   delete: <T>(path: string) => request<T>({ method: "DELETE", url: path }),

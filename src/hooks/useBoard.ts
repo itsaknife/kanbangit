@@ -9,7 +9,7 @@ import { useRepoId } from "./useRouteParams";
 /** Toàn bộ dữ liệu và thao tác cho bảng Kanban: lọc, chia cột, kéo-thả đổi trạng thái. */
 export function useBoard() {
   const repoId = useRepoId();
-  const { issues, loading, error, reload, createIssue, changeStatus, actionError } =
+  const { issues, loading, error, reload, createIssue, changeStatus, actionError, isMoving } =
     useIssues(repoId);
   const { filters, appliedFilters, setFilters, resetFilters } = useIssueFilters();
 
@@ -31,5 +31,6 @@ export function useBoard() {
     createIssue,
     moveIssue: changeStatus,
     actionError,
+    isMoving,
   };
 }

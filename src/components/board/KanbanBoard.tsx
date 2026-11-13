@@ -9,18 +9,21 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { Plus } from "lucide-react";
 import { useState } from "react";
-import { CreateIssueModal, IssueFilterBar } from "@/components/issues";
-import { Button, ErrorMessage, Spinner } from "@/components/ui";
+import { createPortal } from "react-dom";
+import { useRepositoryToolbar } from "@/components/layout/RepositoryWorkspace";
+import { IssueFilterBar, CreateIssueModal } from "@/components/issues";
+import { CreateIssueButton } from "@/components/issues/CreateIssueButton";
+import { ErrorMessage, Spinner } from "@/components/ui";
 import { BOARD_COLUMNS } from "@/constants";
 import { useBoard, useRepoId } from "@/hooks";
-import type { Issue, IssueStatus } from "@/types";
+import type { Issue } from "@/types";
 import { getErrorMessage } from "@/utils";
 import { BoardCardContent } from "./BoardCardContent";
 import { BoardColumn } from "./BoardColumn";
 
 export function KanbanBoard() {
+  const toolbar = useRepositoryToolbar();
   const repoId = useRepoId();
   const {
     columns,
@@ -31,9 +34,10 @@ export function KanbanBoard() {
     loading,
     error,
     reload,
-    createIssue,
     moveIssue,
+    createIssue,
     actionError,
+    isMoving,
   } = useBoard();
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null);
   const [creating, setCreating] = useState(false);
@@ -42,9 +46,9 @@ export function KanbanBoard() {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const handleDragStart = (event: DragStartEvent) => {
-    const issueNumber = Number(event.active.id);
+    const issueId = String(event.active.id);
     const issue = BOARD_COLUMNS.flatMap((column) => columns[column.status]).find(
-      (item) => item.number === issueNumber,
+      (item) => item.id === issueId,
     );
     setActiveIssue(issue ?? null);
   };
@@ -53,7 +57,8 @@ export function KanbanBoard() {
     setActiveIssue(null);
     const { active, over } = event;
     if (!over) return; // thả ra ngoài các cột
-    void moveIssue(Number(active.id), over.id as IssueStatus);
+    const column = BOARD_COLUMNS.find((item) => item.status === over.id);
+    if (column) void moveIssue(String(active.id), column.status);
   };
 
   if (loading) {
@@ -66,24 +71,27 @@ export function KanbanBoard() {
   if (error) return <ErrorMessage message={getErrorMessage(error)} onRetry={reload} />;
 
   return (
-    <section className="flex min-w-0 min-h-[calc(100vh-13rem)] flex-col gap-4 rounded-2xl border border-border/70 bg-muted/35 p-4 shadow-sm dark:bg-zinc-900/60 lg:p-5">
-      <div className="flex items-center justify-end gap-2 px-1">
-        <IssueFilterBar
-          value={filters}
-          assignees={assignees}
-          onChange={setFilters}
-          onReset={resetFilters}
-        />
-        <Button
-          onClick={() => setCreating(true)}
-          className="h-10 w-10 rounded-xl p-0"
-          title="Tạo issue mới"
-          aria-label="Tạo issue mới"
-        >
-          <Plus className="h-8 w-8" strokeWidth={2.5} />
-        </Button>
-      </div>
+    <section className="flex h-[calc(100dvh-13rem)] min-h-[36rem] min-w-0 flex-col gap-3 overflow-hidden rounded-xl border border-border/70 bg-muted/35 p-3 shadow-sm dark:bg-zinc-900/60 lg:p-4">
+      {toolbar &&
+        createPortal(
+          <>
+            <IssueFilterBar
+              value={filters}
+              assignees={assignees}
+              onChange={setFilters}
+              onReset={resetFilters}
+            />
+            <CreateIssueButton onClick={() => setCreating(true)} />
+          </>,
+          toolbar,
+        )}
 
+      <CreateIssueModal open={creating} onClose={() => setCreating(false)} onCreate={createIssue} />
+      {isMoving && (
+        <p role="status" className="text-sm text-muted-foreground">
+          Đang lưu trạng thái…
+        </p>
+      )}
       {actionError && <ErrorMessage message={actionError} />}
 
       {/* id cố định để tránh lệch id giữa server và client khi hydrate */}
@@ -94,7 +102,10 @@ export function KanbanBoard() {
         onDragEnd={handleDragEnd}
         onDragCancel={() => setActiveIssue(null)}
       >
-        <div className="flex gap-4 overflow-x-auto pb-2">
+        <div
+          className="kanban-scrollbar flex min-h-0 flex-1 items-stretch gap-4 overflow-x-auto overflow-y-hidden pb-2"
+          aria-label="Các cột Kanban"
+        >
           {BOARD_COLUMNS.map((column) => (
             <BoardColumn
               key={column.status}
@@ -109,8 +120,6 @@ export function KanbanBoard() {
           {activeIssue ? <BoardCardContent issue={activeIssue} repoId={repoId} /> : null}
         </DragOverlay>
       </DndContext>
-
-      <CreateIssueModal open={creating} onClose={() => setCreating(false)} onCreate={createIssue} />
     </section>
   );
 }

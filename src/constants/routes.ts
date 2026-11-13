@@ -8,6 +8,7 @@ export const ROUTES = {
   settings: "/settings",
   board: (repoId: Id) => `/repositories/${repoId}/board`,
   issues: (repoId: Id) => `/repositories/${repoId}/issues`,
-  issueDetail: (repoId: Id, issueNumber: Id) => `/repositories/${repoId}/issues/${issueNumber}`,
+  issueCreate: (repoId: Id) => `/repositories/${repoId}/issues/new`,
+  issueDetail: (repoId: Id, issueId: string) => `/repositories/${repoId}/issues/${issueId}`,
   dashboard: (repoId: Id) => `/repositories/${repoId}/dashboard`,
 } as const;

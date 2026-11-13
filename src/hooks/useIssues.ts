@@ -13,7 +13,7 @@ export function useIssues(repoId: string) {
   const createIssue = useIssuesStore((store) => store.createIssue);
   const moveIssue = useIssuesStore((store) => store.moveIssue);
   useEffect(() => {
-    if (!state) void fetchIssues(repoId);
+    if (!state || (!state.loaded && !state.loading && !state.error)) void fetchIssues(repoId);
   }, [state, repoId, fetchIssues]);
   useRepoRoom(repoId);
   useSocketEvent<IssueEventPayload>(SOCKET_EVENTS.issueCreated, ({ repoId: id, issue }) => {
@@ -22,8 +22,8 @@ export function useIssues(repoId: string) {
   useSocketEvent<IssueEventPayload>(SOCKET_EVENTS.issueUpdated, ({ repoId: id, issue }) => {
     if (id === repoId) applyIssue(repoId, issue);
   });
-  useSocketEvent<IssueDeletedPayload>(SOCKET_EVENTS.issueDeleted, ({ repoId: id, number }) => {
-    if (id === repoId) removeIssue(repoId, number);
+  useSocketEvent<IssueDeletedPayload>(SOCKET_EVENTS.issueDeleted, ({ repoId: id, id: issueId }) => {
+    if (id === repoId) removeIssue(repoId, issueId);
   });
   return {
     issues: state?.issues ?? [],
@@ -31,8 +31,9 @@ export function useIssues(repoId: string) {
     error: state?.error ?? null,
     reload: () => fetchIssues(repoId),
     createIssue: (payload: Parameters<typeof createIssue>[1]) => createIssue(repoId, payload),
-    changeStatus: (issueNumber: number, status: Parameters<typeof moveIssue>[2]) =>
-      moveIssue(repoId, issueNumber, status),
+    changeStatus: (issueId: string, status: Parameters<typeof moveIssue>[2]) =>
+      moveIssue(repoId, issueId, status),
+    isMoving: state?.isMoving ?? false,
     actionError: state?.actionError ?? null,
   };
 }

@@ -1,66 +1,84 @@
 import type { UserSummary } from "./user.types";
-
-/** Trạng thái hiển thị trên bảng Kanban. */
-export type IssueStatus = "todo" | "in_progress" | "done";
-
-/** Trạng thái gốc của issue trên GitHub. */
+export type IssueStatus =
+  | "todo"
+  | "in_progress"
+  | "done"
+  | "verified"
+  | "closed"
+  | "reopen"
+  | "rejected"
+  | "paused"
+  | "canceled";
 export type IssueState = "open" | "closed";
-
 export interface IssueLabel {
   name: string;
-  /** Mã màu hex không có dấu #, ví dụ "d73a4a". */
   color: string;
 }
-
+export interface IssueParent {
+  id: string;
+  issueCode: string;
+  title: string;
+}
 export interface Issue {
   id: string;
   issueCode: string;
   trackerId: string;
-  number: number;
+  number: number | null;
   title: string;
   body: string | null;
   state: IssueState;
   status: IssueStatus;
   labels: IssueLabel[];
   assignees: UserSummary[];
+  assigneeId: string | null;
   author: UserSummary | null;
-  htmlUrl: string;
-  createdAt: string;
-  updatedAt: string;
+  htmlUrl: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
   closedAt: string | null;
-  /** Thời điểm bắt đầu làm, do hệ thống Kanbangit quản lý. */
-  dueDate: string | null;
-  /** Thời điểm hoàn thành, do hệ thống Kanbangit quản lý. */
+  startDate: string | null;
+  endDate: string | null;
+  estimateMinutes: number | null;
+  parentId: string | null;
+  parent?: IssueParent | null;
+  combinedEstimateMinutes: number | null;
+  subIssueEstimateMinutes: number;
+  syncStatus: string;
 }
-
-/** Bộ lọc dùng chung cho bảng Kanban và danh sách issue. "all" nghĩa là không lọc. */
 export interface IssueFilters {
+  status: IssueStatus | "all";
   search: string;
   trackerId: string;
   assignee: string;
   dueFrom: string;
   dueTo: string;
 }
-
 export interface CreateIssuePayload {
   trackerId: string;
   title: string;
   body?: string;
-  labels?: string[];
-  assignees?: string[];
-  dueDate?: string | null;
+  assigneeId?: string | null;
+  status?: IssueStatus;
+  startDate?: string | null;
+  endDate?: string | null;
+  estimateMinutes?: number | null;
+  parentId?: string | null;
 }
-
 export type UpdateIssuePayload = Partial<CreateIssuePayload>;
-
-/** Payload của socket event issue:created và issue:updated. */
+export interface IssueListResponse {
+  data: Issue[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
 export interface IssueEventPayload {
   repoId: string;
   issue: Issue;
 }
-
-/** Payload của socket event issue:deleted. */
 export interface IssueDeletedPayload {
   repoId: string;
-  number: number;
+  id: string;
 }

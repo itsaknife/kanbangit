@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button, EmptyState, ErrorMessage, Spinner } from "@/components/ui";
-import { List, Plus } from "lucide-react";
+import { EmptyState, ErrorMessage, Spinner } from "@/components/ui";
+import { List } from "lucide-react";
 import { useIssueFilters, useIssues, useRepoId } from "@/hooks";
 import { filterIssues, getAssigneeLogins, getErrorMessage } from "@/utils";
 import { CreateIssueModal } from "./CreateIssueModal";
+import { CreateIssueButton } from "./CreateIssueButton";
 import { IssueFilterBar } from "./IssueFilterBar";
 import { IssueItem } from "./IssueItem";
 
@@ -45,20 +46,13 @@ export function IssueList() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-        <IssueFilterBar
-          value={filters}
-          assignees={assignees}
-          onChange={setFilters}
-          onReset={resetFilters}
-        />
-          <Button
-            onClick={() => setCreating(true)}
-            className="h-10 w-10 rounded-xl p-0"
-            title="Tạo issue mới"
-            aria-label="Tạo issue mới"
-          >
-            <Plus className="h-8 w-8" strokeWidth={2.5} />
-          </Button>
+          <IssueFilterBar
+            value={filters}
+            assignees={assignees}
+            onChange={setFilters}
+            onReset={resetFilters}
+          />
+          <CreateIssueButton onClick={() => setCreating(true)} />
         </div>
       </div>
 
@@ -67,11 +61,10 @@ export function IssueList() {
       ) : (
         <div className="flex flex-col gap-3">
           {visibleIssues.map((issue) => (
-            <IssueItem key={issue.number} issue={issue} repoId={repoId} />
+            <IssueItem key={issue.id} issue={issue} repoId={repoId} />
           ))}
         </div>
       )}
-
       <CreateIssueModal open={creating} onClose={() => setCreating(false)} onCreate={createIssue} />
     </section>
   );

@@ -7,25 +7,31 @@ import { getErrorMessage, upsertIssue } from "@/utils";
 interface RepoState {
   issues: Issue[];
   loading: boolean;
+  loaded: boolean;
   error: string | null;
   actionError: string | null;
   isCreating: boolean;
   isMoving: boolean;
 }
 interface IssuesStore {
-  loadIssue: (repoId: string, number: number) => Promise<Issue>;
-  updateIssue: (repoId: string, number: number, payload: UpdateIssuePayload) => Promise<Issue>;
-  updateStatus: (repoId: string, number: number, status: IssueStatus) => Promise<Issue>;
+  loadSubIssues: (repoId: string, id: string) => Promise<Issue[]>;
+  setParent: (repoId: string, id: string, parentId: string | null) => Promise<Issue>;
+  cascadeClose: (repoId: string, id: string) => Promise<Issue>;
+
+  loadIssue: (repoId: string, id: string) => Promise<Issue>;
+  updateIssue: (repoId: string, id: string, payload: UpdateIssuePayload) => Promise<Issue>;
+  updateStatus: (repoId: string, id: string, status: IssueStatus) => Promise<Issue>;
   byRepository: Record<string, RepoState>;
   fetchIssues: (repoId: string) => Promise<void>;
   createIssue: (repoId: string, payload: CreateIssuePayload) => Promise<Issue>;
-  moveIssue: (repoId: string, issueNumber: number, status: IssueStatus) => Promise<void>;
+  moveIssue: (repoId: string, issueId: string, status: IssueStatus) => Promise<void>;
   applyIssue: (repoId: string, issue: Issue) => void;
-  removeIssue: (repoId: string, issueNumber: number) => void;
+  removeIssue: (repoId: string, issueId: string) => void;
 }
 const empty = (): RepoState => ({
   issues: [],
   loading: false,
+  loaded: false,
   error: null,
   actionError: null,
   isCreating: false,
@@ -33,15 +39,30 @@ const empty = (): RepoState => ({
 });
 
 export const useIssuesStore = create<IssuesStore>((set, get) => ({
-  loadIssue: async (repoId, number) => {
-    const issue = await issueService.getByNumber(repoId, number);
+  loadSubIssues: (repoId, id) => issueService.subIssues(repoId, id),
+  setParent: async (repoId, id, parentId) => {
+    if (parentId) await issueService.setParent(repoId, id, parentId);
+    else await issueService.removeParent(repoId, id);
+    const issue = await get().loadIssue(repoId, id);
+    await get().fetchIssues(repoId);
+    return issue;
+  },
+  cascadeClose: async (repoId, id) => {
+    await issueService.cascadeClose(repoId, id);
+    const issue = await get().loadIssue(repoId, id);
+    await get().fetchIssues(repoId);
+    return issue;
+  },
+  loadIssue: async (repoId, id) => {
+    const issue = await issueService.getById(repoId, id);
     get().applyIssue(repoId, issue);
     return issue;
   },
-  updateIssue: async (repoId, number, payload) => {
+  updateIssue: async (repoId, id, payload) => {
     try {
-      const issue = await issueService.update(repoId, number, payload);
+      const issue = await issueService.update(repoId, id, payload);
       get().applyIssue(repoId, issue);
+      void get().fetchIssues(repoId);
       return issue;
     } catch (error) {
       set((s) => ({
@@ -53,9 +74,9 @@ export const useIssuesStore = create<IssuesStore>((set, get) => ({
       throw error;
     }
   },
-  updateStatus: async (repoId, number, status) => {
+  updateStatus: async (repoId, id, status) => {
     try {
-      const issue = await issueService.updateStatus(repoId, number, status);
+      const issue = await issueService.updateStatus(repoId, id, status);
       get().applyIssue(repoId, issue);
       return issue;
     } catch (error) {
@@ -81,7 +102,7 @@ export const useIssuesStore = create<IssuesStore>((set, get) => ({
       set((s) => ({
         byRepository: {
           ...s.byRepository,
-          [repoId]: { ...empty(), ...s.byRepository[repoId], issues, loading: false },
+          [repoId]: { ...empty(), ...s.byRepository[repoId], issues, loading: false, loaded: true },
         },
       }));
     } catch (error) {
@@ -92,6 +113,7 @@ export const useIssuesStore = create<IssuesStore>((set, get) => ({
             ...empty(),
             ...s.byRepository[repoId],
             loading: false,
+            loaded: false,
             error: getErrorMessage(error),
           },
         },
@@ -129,11 +151,9 @@ export const useIssuesStore = create<IssuesStore>((set, get) => ({
       throw error;
     }
   },
-  moveIssue: async (repoId, issueNumber, status) => {
-    const previous = get().byRepository[repoId]?.issues.find(
-      (issue) => issue.number === issueNumber,
-    );
-    if (!previous || previous.status === status) return;
+  moveIssue: async (repoId, issueId, status) => {
+    const previous = get().byRepository[repoId]?.issues.find((issue) => issue.id === issueId);
+    if (!previous || previous.status === status || get().byRepository[repoId]?.isMoving) return;
     set((s) => ({
       byRepository: {
         ...s.byRepository,
@@ -142,13 +162,13 @@ export const useIssuesStore = create<IssuesStore>((set, get) => ({
           isMoving: true,
           actionError: null,
           issues: s.byRepository[repoId].issues.map((issue) =>
-            issue.number === issueNumber ? { ...issue, status } : issue,
+            issue.id === issueId ? { ...issue, status } : issue,
           ),
         },
       },
     }));
     try {
-      const updated = await issueService.updateStatus(repoId, issueNumber, status);
+      const updated = await issueService.updateStatus(repoId, issueId, status);
       get().applyIssue(repoId, updated);
       set((s) => ({
         byRepository: {
@@ -165,7 +185,7 @@ export const useIssuesStore = create<IssuesStore>((set, get) => ({
             isMoving: false,
             actionError: getErrorMessage(error),
             issues: s.byRepository[repoId].issues.map((issue) =>
-              issue.number === issueNumber ? previous : issue,
+              issue.id === issueId ? previous : issue,
             ),
           },
         },
@@ -183,14 +203,14 @@ export const useIssuesStore = create<IssuesStore>((set, get) => ({
         },
       },
     })),
-  removeIssue: (repoId, number) =>
+  removeIssue: (repoId, id) =>
     set((s) => ({
       byRepository: {
         ...s.byRepository,
         [repoId]: {
           ...empty(),
           ...s.byRepository[repoId],
-          issues: (s.byRepository[repoId]?.issues ?? []).filter((issue) => issue.number !== number),
+          issues: (s.byRepository[repoId]?.issues ?? []).filter((issue) => issue.id !== id),
         },
       },
     })),
