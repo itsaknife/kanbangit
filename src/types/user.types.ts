@@ -5,6 +5,10 @@ export interface UserSummary {
 }
 
 /** Người dùng đang đăng nhập vào hệ thống. */
+export interface IssueAssignee extends UserSummary {
+  id: string;
+}
+
 export interface User extends UserSummary {
   id: string;
   name: string | null;

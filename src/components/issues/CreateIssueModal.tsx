@@ -10,10 +10,11 @@ interface CreateIssueModalProps {
   open: boolean;
   onClose: () => void;
   onCreate: (payload: CreateIssuePayload) => Promise<unknown>;
+  parentId?: string;
 }
 
 /** Hộp thoại tạo issue mới (có AI kiểm tra trùng lặp). Dùng ở cả Kanban và danh sách issue. */
-export function CreateIssueModal({ open, onClose, onCreate }: CreateIssueModalProps) {
+export function CreateIssueModal({ open, onClose, onCreate, parentId }: CreateIssueModalProps) {
   const repoId = useRepoId();
   const { repository } = useRepository(repoId);
   return (
@@ -28,12 +29,13 @@ export function CreateIssueModal({ open, onClose, onCreate }: CreateIssueModalPr
           <span aria-hidden="true" className="text-muted-foreground">
             ›
           </span>
-          <span>Tạo issue mới</span>
+          <span>{parentId ? "Tạo issue con" : "Tạo issue mới"}</span>
         </span>
       }
       onClose={onClose}
     >
       <IssueForm
+        initialValues={parentId ? { parentId } : undefined}
         submitLabel="Tạo issue"
         checkDuplicate
         onCancel={onClose}

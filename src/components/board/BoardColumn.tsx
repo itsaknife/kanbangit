@@ -20,13 +20,13 @@ export function BoardColumn({ status, title, issues }: BoardColumnProps) {
     <section
       ref={setNodeRef}
       className={cn(
-        "flex min-h-[34rem] min-w-[18rem] flex-1 flex-col gap-3 rounded-xl border p-3 transition-colors",
+        "flex h-full w-[21rem] min-w-[21rem] shrink-0 flex-col overflow-hidden rounded-lg border transition-colors",
         isOver
           ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
           : "border-border/80 bg-background/80",
       )}
     >
-      <header className="flex items-center justify-between">
+      <header className="flex shrink-0 items-center justify-between border-b px-4 py-3.5">
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${STATUS_STYLES[status].dot}`} />
           <h3 className="text-sm font-semibold">{title}</h3>
@@ -36,11 +36,13 @@ export function BoardColumn({ status, title, issues }: BoardColumnProps) {
         </span>
       </header>
 
-      {issues.length === 0 ? (
-        <p className="py-6 text-center text-sm text-zinc-400">Chưa có issue</p>
-      ) : (
-        issues.map((issue) => <BoardCard key={issue.number} issue={issue} />)
-      )}
+      <div className="kanban-scrollbar flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
+        {issues.length === 0 ? (
+          <p className="py-8 text-center text-xs text-muted-foreground">Chưa có issue</p>
+        ) : (
+          issues.map((issue) => <BoardCard key={issue.id} issue={issue} />)
+        )}
+      </div>
     </section>
   );
 }

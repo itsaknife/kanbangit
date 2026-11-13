@@ -8,10 +8,12 @@ export function filterIssues(issues: Issue[], filters: IssueFilters): Issue[] {
   return issues.filter((issue) => {
     if (keyword) {
       const matchTitle = issue.title.toLowerCase().includes(keyword);
-      const matchNumber = String(issue.number) === keyword;
+      const matchBody = issue.body?.toLowerCase().includes(keyword) ?? false;
+      const matchNumber = issue.number !== null && String(issue.number) === keyword;
       const matchCode = issue.issueCode.toLowerCase().includes(keyword);
-      if (!matchTitle && !matchNumber && !matchCode) return false;
+      if (!matchTitle && !matchNumber && !matchCode && !matchBody) return false;
     }
+    if (filters.status !== ALL && issue.status !== filters.status) return false;
     if (filters.trackerId !== ALL && issue.trackerId !== filters.trackerId) {
       return false;
     }
@@ -21,9 +23,8 @@ export function filterIssues(issues: Issue[], filters: IssueFilters): Issue[] {
     ) {
       return false;
     }
-    if (filters.dueFrom && (!issue.dueDate || issue.dueDate < filters.dueFrom)) return false;
-    if (filters.dueTo && (!issue.dueDate || issue.dueDate > `${filters.dueTo}T23:59:59`))
-      return false;
+    if (filters.dueFrom && (!issue.endDate || issue.endDate < filters.dueFrom)) return false;
+    if (filters.dueTo && (!issue.endDate || issue.endDate > filters.dueTo)) return false;
     return true;
   });
 }

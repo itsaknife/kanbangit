@@ -25,7 +25,7 @@ export function IssueItem({ issue, repoId }: IssueItemProps) {
           <div className="flex items-start gap-3">
             <span className="pt-0.5 text-sm text-muted-foreground">{issue.issueCode}</span>
             <Link
-              href={ROUTES.issueDetail(repoId, issue.number)}
+              href={ROUTES.issueDetail(repoId, issue.id)}
               className="truncate text-left font-semibold transition-colors group-hover:text-primary hover:underline"
             >
               {issue.title}
@@ -34,7 +34,7 @@ export function IssueItem({ issue, repoId }: IssueItemProps) {
           <div className="mt-2 flex flex-wrap items-center gap-2 pl-7">
             <IssueTracker repoId={repoId} trackerId={issue.trackerId} />
             <span className="text-xs text-muted-foreground">
-              {issue.dueDate ? `Đến hạn vào ${formatDate(issue.dueDate)}` : "Chưa có ngày đến hạn"}
+              {issue.endDate ? `Đến hạn vào ${formatDate(issue.endDate)}` : "Chưa có ngày đến hạn"}
             </span>
           </div>
         </div>

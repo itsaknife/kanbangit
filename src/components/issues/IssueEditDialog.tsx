@@ -10,16 +10,22 @@ interface IssueEditDialogProps {
   onClose: () => void;
 }
 export function IssueEditDialog({ issue, repoId, open, onClose }: IssueEditDialogProps) {
-  const { updateIssue } = useIssue(repoId, issue.number);
+  const { updateIssue } = useIssue(repoId, issue.id);
   return (
-    <Modal open={open} title={`Chỉnh sửa issue #${issue.number}`} onClose={onClose}>
+    <Modal open={open} title={`Chỉnh sửa issue ${issue.issueCode}`} onClose={onClose}>
       <IssueForm
+        initialAssignee={issue.assignees[0]}
+        issueId={issue.id}
         initialValues={{
           trackerId: issue.trackerId,
           title: issue.title,
           body: issue.body ?? "",
-          assignees: issue.assignees.map((person) => person.login),
-          dueDate: issue.dueDate ? issue.dueDate.slice(0, 10) : "",
+          assigneeId: issue.assigneeId ?? "",
+          startDate: issue.startDate ?? "",
+          endDate: issue.endDate ?? "",
+          estimateHours: issue.estimateMinutes === null ? "" : String(issue.estimateMinutes / 60),
+          parentId: issue.parentId ?? "",
+          status: issue.status,
         }}
         submitLabel="Lưu thay đổi"
         onCancel={onClose}

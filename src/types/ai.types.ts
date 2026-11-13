@@ -13,7 +13,8 @@ export interface DuplicateCheckPayload {
 }
 
 export interface DuplicateCandidate {
-  issueNumber: number;
+  issueId: string;
+  issueNumber: number | null;
   title: string;
   /** Lý do LLM cho rằng hai issue có thể trùng nhau. */
   reason: string;

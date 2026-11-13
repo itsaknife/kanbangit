@@ -3,7 +3,7 @@
 import { Button, Input, Popover, PopoverContent, PopoverTrigger, Select } from "@/components/ui";
 import { Filter } from "lucide-react";
 import { useEffect } from "react";
-import { ALL } from "@/constants";
+import { ALL, BOARD_COLUMNS } from "@/constants";
 import { useRepoId } from "@/hooks";
 import { useTrackersStore } from "@/stores/trackers.store";
 import { TrackerIcon } from "@/components/repositories/TrackerIcon";
@@ -29,6 +29,7 @@ export function IssueFilterBar({ value, assignees, onChange, onReset }: IssueFil
   const activeFilterCount =
     Number(Boolean(value.search)) +
     Number(value.trackerId !== ALL) +
+    Number(value.status !== ALL) +
     Number(value.assignee !== ALL) +
     Number(Boolean(value.dueFrom || value.dueTo));
   const trackerOptions = [
@@ -73,9 +74,25 @@ export function IssueFilterBar({ value, assignees, onChange, onReset }: IssueFil
           <div className="flex flex-col gap-3 pt-3">
             <Input
               aria-label="Tìm kiếm issue"
-              placeholder="Tìm theo mã Issue, tiêu đề hoặc #số"
+              placeholder="Tìm mã, tiêu đề, mô tả hoặc #số"
               value={value.search}
               onChange={(event) => onChange({ ...value, search: event.target.value })}
+            />
+            <Select
+              label="Trạng thái"
+              aria-label="Lọc theo trạng thái"
+              value={value.status}
+              options={[
+                { value: ALL, label: "Tất cả trạng thái" },
+                ...BOARD_COLUMNS.map((column) => ({ value: column.status, label: column.title })),
+              ]}
+              onChange={(nextValue) =>
+                onChange({
+                  ...value,
+                  status:
+                    BOARD_COLUMNS.find((column) => column.status === nextValue)?.status ?? ALL,
+                })
+              }
             />
             <Select
               label="Tracker"

@@ -8,8 +8,8 @@ export function useRepoId(): string {
   return repoId;
 }
 
-/** Số issue lấy từ đường dẫn /repositories/[repoId]/issues/[issueNumber] */
-export function useIssueNumber(): number {
+/** UUID issue lấy từ đường dẫn /repositories/[repoId]/issues/[issueNumber] */
+export function useIssueId(): string {
   const { issueNumber } = useParams<{ issueNumber: string }>();
-  return Number(issueNumber);
+  return issueNumber;
 }
