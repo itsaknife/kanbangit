@@ -66,7 +66,7 @@ export function KanbanBoard() {
   if (error) return <ErrorMessage message={getErrorMessage(error)} onRetry={reload} />;
 
   return (
-    <section className="-mx-4 flex min-h-[calc(100vh-9rem)] flex-col gap-4 rounded-2xl border border-border/70 bg-muted/35 p-4 shadow-sm dark:bg-zinc-900/60 lg:-mx-6 lg:p-5">
+    <section className="flex min-w-0 min-h-[calc(100vh-13rem)] flex-col gap-4 rounded-2xl border border-border/70 bg-muted/35 p-4 shadow-sm dark:bg-zinc-900/60 lg:p-5">
       <div className="flex items-center justify-end gap-2 px-1">
         <IssueFilterBar
           value={filters}

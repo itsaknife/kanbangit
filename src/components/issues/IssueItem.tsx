@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { Badge, Card } from "@/components/ui";
-import { STATUS_STYLES, STATUS_TITLES } from "@/constants";
+import { ROUTES, STATUS_STYLES, STATUS_TITLES } from "@/constants";
 import type { Issue } from "@/types";
 import { cn, formatDate } from "@/utils";
 import { AssigneeAvatars } from "./AssigneeAvatars";
-import { IssueEditDialog } from "./IssueEditDialog";
 import { IssueTracker } from "./IssueTracker";
 
 interface IssueItemProps {
@@ -15,7 +14,6 @@ interface IssueItemProps {
 }
 
 export function IssueItem({ issue, repoId }: IssueItemProps) {
-  const [open, setOpen] = useState(false);
   return (
     <>
       <Card
@@ -26,13 +24,12 @@ export function IssueItem({ issue, repoId }: IssueItemProps) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-3">
             <span className="pt-0.5 text-sm text-muted-foreground">{issue.issueCode}</span>
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
+            <Link
+              href={ROUTES.issueDetail(repoId, issue.number)}
               className="truncate text-left font-semibold transition-colors group-hover:text-primary hover:underline"
             >
               {issue.title}
-            </button>
+            </Link>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2 pl-7">
             <IssueTracker repoId={repoId} trackerId={issue.trackerId} />
@@ -48,9 +45,6 @@ export function IssueItem({ issue, repoId }: IssueItemProps) {
           <AssigneeAvatars assignees={issue.assignees} />
         </div>
       </Card>
-      {open && (
-        <IssueEditDialog issue={issue} repoId={repoId} open onClose={() => setOpen(false)} />
-      )}
     </>
   );
 }

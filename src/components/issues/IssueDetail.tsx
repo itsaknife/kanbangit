@@ -14,7 +14,7 @@ import {
 import { BOARD_COLUMNS, ROUTES } from "@/constants";
 import { useIssue, useIssueNumber, useRepoId } from "@/hooks";
 import type { IssueStatus } from "@/types";
-import { formatDateTime, getErrorMessage } from "@/utils";
+import { formatDate, formatDateTime, getErrorMessage } from "@/utils";
 import { AssigneeAvatars } from "./AssigneeAvatars";
 import { IssueForm } from "./IssueForm";
 import { IssueTracker } from "./IssueTracker";
@@ -74,12 +74,12 @@ export function IssueDetail() {
   }
 
   return (
-    <Card className="flex flex-col gap-4 p-5">
+    <Card className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-5 sm:p-8">
       <Link href={ROUTES.issues(repoId)} className="text-sm text-blue-600 hover:underline">
         ← Danh sách issue
       </Link>
 
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b pb-6">
         <h2 className="text-xl font-semibold">
           <span className="text-zinc-500">{issue.issueCode}</span> {issue.title}
         </h2>
@@ -100,6 +100,7 @@ export function IssueDetail() {
 
       <div className="flex flex-wrap items-center gap-3">
         <Select
+          label="Trạng thái"
           aria-label="Trạng thái"
           options={STATUS_OPTIONS}
           value={issue.status}
@@ -107,10 +108,14 @@ export function IssueDetail() {
         />
         <IssueTracker repoId={repoId} trackerId={issue.trackerId} />
         <AssigneeAvatars assignees={issue.assignees} />
+        <span className="text-sm text-muted-foreground">
+          Hạn hoàn thành: {issue.dueDate ? formatDate(issue.dueDate) : "Chưa đặt"}
+        </span>
       </div>
       {statusError && <ErrorMessage message={statusError} />}
 
-      <p className="whitespace-pre-wrap text-sm leading-6">
+      <h3 className="text-sm font-semibold">Mô tả</h3>
+      <p className="min-h-40 whitespace-pre-wrap text-sm leading-7">
         {issue.body || "Issue này chưa có mô tả."}
       </p>
 
