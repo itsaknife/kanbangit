@@ -145,15 +145,15 @@ export function IssueForm({
     },
     ...(values.assigneeId && !assignees.some((person) => person.id === values.assigneeId)
       ? [
-          {
-            value: values.assigneeId,
-            label: `${initialAssignee?.login ?? "Người thực hiện hiện tại"} (không còn khả dụng)`,
-            icon: initialAssignee ? (
-              <Avatar src={initialAssignee.avatarUrl} alt="" size={20} />
-            ) : undefined,
-            disabled: true,
-          },
-        ]
+        {
+          value: values.assigneeId,
+          label: `${initialAssignee?.login ?? "Người thực hiện hiện tại"} (không còn khả dụng)`,
+          icon: initialAssignee ? (
+            <Avatar src={initialAssignee.avatarUrl} alt="" size={20} />
+          ) : undefined,
+          disabled: true,
+        },
+      ]
       : []),
     ...assignees.map((person) => ({
       value: person.id,
@@ -280,7 +280,7 @@ export function IssueForm({
           />
           <Input
             name="estimateHours"
-            label="Ước lượng (giờ)"
+            label="Estimate (h)"
             type="number"
             min={0}
             step={0.5}
