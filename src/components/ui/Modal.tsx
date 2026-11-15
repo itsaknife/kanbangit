@@ -19,8 +19,8 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50" />
         <DialogPrimitive.Content
           className={cn(
-            "fixed left-1/2 top-1/2 z-50 grid max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] max-w-4xl",
-            "-translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border bg-background shadow-lg",
+            "fixed left-1/2 top-1/2 z-50 grid min-w-0 max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] max-w-4xl",
+            "-translate-x-1/2 -translate-y-1/2 overflow-x-hidden overflow-y-auto rounded-xl border bg-background shadow-lg",
             "focus:outline-none",
           )}
         >
@@ -34,7 +34,7 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
           <DialogPrimitive.Title className="border-b px-5 py-3 text-base font-semibold">
             {title}
           </DialogPrimitive.Title>
-          <div className="px-8 py-6">{children}</div>
+          <div className="min-w-0 px-5 py-5 sm:px-6">{children}</div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

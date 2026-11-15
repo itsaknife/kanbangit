@@ -7,4 +7,5 @@ export const SOCKET_EVENTS = {
   issueCreated: "issue:created",
   issueUpdated: "issue:updated",
   issueDeleted: "issue:deleted",
+  collaborationChanged: "collaboration:changed",
 } as const;

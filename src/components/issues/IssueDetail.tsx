@@ -8,6 +8,9 @@ import { useIssue, useIssueId, useRepoId } from "@/hooks";
 import { formatDateTime, getErrorMessage } from "@/utils";
 import { IssueHierarchy } from "./IssueHierarchy";
 import { IssueForm } from "./IssueForm";
+import { IssueWorklogs } from "@/components/worklogs/IssueWorklogs";
+import { IssueComments } from "@/components/comments/IssueComments";
+import { IssueSync } from "@/components/sync/IssueSync";
 
 const STATUS_OPTIONS = BOARD_COLUMNS.map((column) => ({
   value: column.status,
@@ -33,38 +36,39 @@ export function IssueDetail() {
 
   return (
     <section className="flex min-h-[calc(100vh-14rem)] w-full flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-5">
-        <div className="space-y-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Link
             href={ROUTES.issues(repoId)}
             className="text-xs text-muted-foreground hover:text-foreground"
           >
             ← Danh sách issue
           </Link>
-          <h1 className="text-xl font-semibold">
+          <span aria-hidden="true" className="h-4 w-px bg-border" />
+          <h1 className="text-sm font-medium">
             {issue.issueCode}
-            <span className="ml-3 text-sm font-normal text-muted-foreground">
-              {issue.number !== null ? `GitHub #${issue.number}` : "Được tạo trong KanbanGit"}
-            </span>
+            {issue.number !== null && (
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                GitHub #{issue.number}
+              </span>
+            )}
           </h1>
         </div>
-        {issue.htmlUrl && (
-          <a
-            href={issue.htmlUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonClassName({ variant: "secondary", size: "sm" })}
-          >
-            Mở trên GitHub ↗
-          </a>
-        )}
+        <div className="flex items-center gap-3">
+          <IssueSync key={issue.id} repoId={repoId} issueId={issue.id} status={issue.syncStatus} />
+          {issue.htmlUrl && (
+            <a
+              href={issue.htmlUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonClassName({ variant: "ghost", size: "sm" })}
+            >
+              Mở trên GitHub ↗
+            </a>
+          )}
+        </div>
       </div>
       {error ? <ErrorMessage message={getErrorMessage(error)} onRetry={reload} /> : null}
-      {issue.syncStatus === "PENDING_SYNC" && (
-        <p role="status" className="text-sm text-muted-foreground">
-          Đã lưu trong KanbanGit · Chờ đồng bộ GitHub
-        </p>
-      )}
       {saved && (
         <p role="status" className="text-sm text-emerald-600 dark:text-emerald-400">
           Đã lưu thay đổi.
@@ -88,9 +92,10 @@ export function IssueDetail() {
           status: issue.status,
         }}
         properties={
-          <div className="space-y-2 border-b pb-5">
+          <div className="space-y-1.5">
             <Select
               label="Trạng thái"
+              appearance="subtle"
               options={STATUS_OPTIONS}
               value={issue.status}
               disabled={statusSaving}
@@ -108,7 +113,6 @@ export function IssueDetail() {
                 }
               }}
             />
-            <p className="text-xs text-muted-foreground">Thay đổi trạng thái được lưu ngay.</p>
             {statusError && (
               <p role="alert" className="text-xs text-destructive">
                 {statusError}
@@ -127,6 +131,13 @@ export function IssueDetail() {
         }}
       />
       <IssueHierarchy key={issue.id} repoId={repoId} issue={issue} />
+      <IssueWorklogs
+        key={`time-${issue.id}`}
+        repoId={repoId}
+        issueId={issue.id}
+        version={`${issue.updatedAt}-${issue.combinedEstimateMinutes}`}
+      />
+      <IssueComments key={`comments-${issue.id}`} repoId={repoId} issueId={issue.id} />
       <footer className="mt-auto border-t pt-4 text-xs leading-6 text-muted-foreground">
         Tạo bởi {issue.author?.login ?? "không rõ"} ·{" "}
         {issue.createdAt ? formatDateTime(issue.createdAt) : "—"}

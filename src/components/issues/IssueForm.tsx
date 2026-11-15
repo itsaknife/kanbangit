@@ -1,8 +1,18 @@
 "use client";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useTrackersStore } from "@/stores/trackers.store";
-import { Avatar, Button, Input, Select, Textarea } from "@/components/ui";
-import { Tag, UserRound } from "lucide-react";
+import {
+  Avatar,
+  Button,
+  DatePicker,
+  Input,
+  Select,
+  Textarea,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui";
+import { CircleDashed, Clock3, GitBranch, UserRound } from "lucide-react";
 import { TrackerIcon } from "@/components/repositories/TrackerIcon";
 import { useAssignees, useDuplicateCheck, useRepoId } from "@/hooks";
 import type { CreateIssuePayload, UserSummary } from "@/types";
@@ -145,15 +155,15 @@ export function IssueForm({
     },
     ...(values.assigneeId && !assignees.some((person) => person.id === values.assigneeId)
       ? [
-        {
-          value: values.assigneeId,
-          label: `${initialAssignee?.login ?? "Người thực hiện hiện tại"} (không còn khả dụng)`,
-          icon: initialAssignee ? (
-            <Avatar src={initialAssignee.avatarUrl} alt="" size={20} />
-          ) : undefined,
-          disabled: true,
-        },
-      ]
+          {
+            value: values.assigneeId,
+            label: `${initialAssignee?.login ?? "Người thực hiện hiện tại"} (không còn khả dụng)`,
+            icon: initialAssignee ? (
+              <Avatar src={initialAssignee.avatarUrl} alt="" size={20} />
+            ) : undefined,
+            disabled: true,
+          },
+        ]
       : []),
     ...assignees.map((person) => ({
       value: person.id,
@@ -161,163 +171,257 @@ export function IssueForm({
       icon: <Avatar src={person.avatarUrl ?? ""} alt="" size={20} />,
     })),
   ];
+  const dialog = layout === "dialog";
+  const controlAppearance = dialog ? "pill" : "subtle";
+  const controlLabelLayout = "vertical";
+  const [estimateOpen, setEstimateOpen] = useState(false);
+  const descriptionField = (
+    <Textarea
+      name="body"
+      label={dialog ? undefined : "Mô tả"}
+      aria-label="Mô tả"
+      labelLayout={controlLabelLayout}
+      rows={layout === "page" ? 7 : 4}
+      maxLength={65000}
+      className={
+        layout === "page"
+          ? "min-h-32 resize-y border-0 bg-transparent px-0 leading-7 shadow-none focus-visible:bg-muted/20 focus-visible:ring-0"
+          : "min-h-36 resize-y border-0 bg-transparent px-0 leading-6 shadow-none focus-visible:bg-muted/20 focus-visible:ring-0"
+      }
+      placeholder="Thêm mô tả..."
+      value={values.body}
+      onChange={(event) => updateValue("body", event.target.value)}
+    />
+  );
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      <fieldset
-        disabled={checking || submitting}
-        className={
-          layout === "page"
-            ? "grid min-w-0 gap-8 disabled:opacity-70 lg:grid-cols-[minmax(0,1fr)_300px]"
-            : "min-w-0 space-y-5 disabled:opacity-70"
-        }
-      >
-        <div className="min-w-0 space-y-5">
-          <Input
-            name="title"
-            label="Tiêu đề"
-            required
-            maxLength={256}
-            placeholder="Tiêu đề issue"
-            value={values.title}
-            className={
-              layout === "page"
-                ? "h-12 bg-background text-lg font-semibold"
-                : "h-11 bg-muted/25 font-medium"
-            }
-            onChange={(event) => updateValue("title", event.target.value)}
-          />
-          <Textarea
-            name="body"
-            label="Mô tả"
-            rows={6}
-            maxLength={65000}
-            className={
-              layout === "page"
-                ? "min-h-[360px] resize-y bg-background leading-7"
-                : "min-h-36 resize-y bg-muted/25 leading-6"
-            }
-            placeholder="Thêm mô tả..."
-            value={values.body}
-            onChange={(event) => updateValue("body", event.target.value)}
-          />
-        </div>
-        <div
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <fieldset disabled={checking || submitting} className="min-w-0 space-y-5 disabled:opacity-70">
+        <Input
+          name="title"
+          aria-label="Tiêu đề"
+          labelLayout={controlLabelLayout}
+          required
+          maxLength={256}
+          placeholder="Tiêu đề issue"
+          value={values.title}
           className={
-            layout === "page"
-              ? "flex flex-col gap-5 rounded-lg border bg-muted/20 p-5 lg:self-start"
-              : "grid gap-x-5 gap-y-4 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2"
+            dialog
+              ? "h-12 border-0 bg-transparent px-0 text-xl font-semibold shadow-none placeholder:text-muted-foreground/70 focus-visible:bg-muted/20 focus-visible:ring-0"
+              : "h-14 border-0 bg-transparent px-0 text-2xl font-semibold shadow-none focus-visible:bg-muted/20 focus-visible:ring-0"
+          }
+          autoFocus={dialog}
+          onChange={(event) => updateValue("title", event.target.value)}
+        />
+        {dialog && descriptionField}
+        <section
+          aria-label="Thuộc tính issue"
+          className={
+            dialog
+              ? "space-y-3"
+              : "py-1 [&_label]:px-2 [&_label]:text-xs [&_label]:font-normal [&_label]:text-muted-foreground"
           }
         >
-          {properties}
-          <Select
-            label="Tracker"
-            aria-label="Tracker"
-            placeholder={trackerState?.loading ? "Đang tải tracker..." : "Chọn tracker"}
-            options={trackerOptions.map((t) => ({
-              value: t.id,
-              label: t.name + (t.isActive ? "" : " (Đã vô hiệu hóa)"),
-              icon: <TrackerIcon tracker={t} />,
-              description: `${t.prefix} · ${t.isActive ? "Đang hoạt động" : "Đã vô hiệu hóa"}`,
-              disabled: !t.isActive,
-            }))}
-            value={trackerId}
-            disabled={!trackerOptions.length || trackerState?.loading}
-            onChange={(value) => setValues((current) => ({ ...current, trackerId: value }))}
-          />
-          <Select
-            label="Người thực hiện"
-            aria-label="Người thực hiện"
-            options={assigneeOptions}
-            value={values.assigneeId}
-            onChange={(nextValue) =>
-              setValues((current) => ({ ...current, assigneeId: nextValue }))
+          <div
+            className={
+              dialog
+                ? "flex min-w-0 flex-wrap items-center gap-2"
+                : "grid min-w-0 items-start gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-3"
             }
-            disabled={assigneesLoading}
-            placeholder={assigneesLoading ? "Đang tải thành viên..." : "Chưa được giao"}
-          />
-          <div className="space-y-1.5">
+          >
+            {properties}
+            {!properties && (
+              <Select
+                label="Trạng thái"
+                labelLayout={controlLabelLayout}
+                appearance={controlAppearance}
+                value={values.status}
+                options={BOARD_COLUMNS.map((column) => ({
+                  value: column.status,
+                  label: column.title,
+                  icon: dialog ? (
+                    <CircleDashed className="size-3.5 text-muted-foreground" />
+                  ) : undefined,
+                }))}
+                onChange={(value) => {
+                  const status = BOARD_COLUMNS.find((column) => column.status === value)?.status;
+                  if (status) setValues((current) => ({ ...current, status }));
+                }}
+              />
+            )}
             <Select
-              label="Label"
-              aria-label="Label (tạm chưa sử dụng)"
-              options={[]}
-              disabled
-              placeholder="Chưa sử dụng"
-            />
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Tag className="h-3 w-3" aria-hidden="true" />
-              Tạm để trống.
-            </p>
-          </div>
-          {!properties && (
-            <Select
-              label="Trạng thái"
-              value={values.status}
-              options={BOARD_COLUMNS.map((column) => ({
-                value: column.status,
-                label: column.title,
+              label="Tracker"
+              labelLayout={controlLabelLayout}
+              appearance={controlAppearance}
+              aria-label="Tracker"
+              placeholder={trackerState?.loading ? "Đang tải tracker..." : "Chọn tracker"}
+              options={trackerOptions.map((tracker) => ({
+                value: tracker.id,
+                label: tracker.name + (tracker.isActive ? "" : " (Đã vô hiệu hóa)"),
+                icon: <TrackerIcon tracker={tracker} />,
+                description:
+                  tracker.prefix + " · " + (tracker.isActive ? "Đang hoạt động" : "Đã vô hiệu hóa"),
+                disabled: !tracker.isActive,
               }))}
-              onChange={(value) => {
-                const status = BOARD_COLUMNS.find((c) => c.status === value)?.status;
-                if (status) setValues((current) => ({ ...current, status }));
-              }}
+              value={trackerId}
+              disabled={!trackerOptions.length || trackerState?.loading}
+              onChange={(value) => setValues((current) => ({ ...current, trackerId: value }))}
             />
-          )}
-          <Input
-            name="startDate"
-            label="Ngày bắt đầu"
-            type="date"
-            value={values.startDate}
-            max={values.endDate || undefined}
-            onChange={(event) => updateValue("startDate", event.target.value)}
-          />
-          <Input
-            name="endDate"
-            label="Ngày kết thúc"
-            type="date"
-            value={values.endDate}
-            min={values.startDate || undefined}
-            onChange={(event) => updateValue("endDate", event.target.value)}
-          />
-          <Input
-            name="estimateHours"
-            label="Estimate (h)"
-            type="number"
-            min={0}
-            step={0.5}
-            value={values.estimateHours}
-            placeholder="Chưa ước lượng"
-            onChange={(event) => updateValue("estimateHours", event.target.value)}
-          />
-          <Select
-            label="Issue cha"
-            value={values.parentId}
-            disabled={issueState?.loading}
-            options={[
-              { value: "", label: "Không có issue cha" },
-              ...parentOptions.map((item) => ({
-                value: item.id,
-                label: item.issueCode + " · " + item.title,
-              })),
-              ...(values.parentId && !parentOptions.some((item) => item.id === values.parentId)
-                ? [{ value: values.parentId, label: values.parentId }]
-                : []),
-            ]}
-            onChange={(value) => updateValue("parentId", value)}
-          />
-          <p className="text-xs text-muted-foreground">
-            Tối đa 3 cấp trong cùng repository. Hệ thống kiểm tra quan hệ khi lưu.
-          </p>
+            <Select
+              label="Người thực hiện"
+              labelLayout={controlLabelLayout}
+              appearance={controlAppearance}
+              aria-label="Người thực hiện"
+              options={assigneeOptions}
+              value={values.assigneeId}
+              onChange={(value) => setValues((current) => ({ ...current, assigneeId: value }))}
+              disabled={assigneesLoading}
+              placeholder={assigneesLoading ? "Đang tải thành viên..." : "Chưa được giao"}
+            />
+            <Select
+              label="Issue cha"
+              labelLayout={controlLabelLayout}
+              appearance={controlAppearance}
+              value={values.parentId}
+              disabled={issueState?.loading}
+              options={[
+                {
+                  value: "",
+                  label: dialog ? "Issue cha" : "Không có issue cha",
+                  icon: dialog ? (
+                    <GitBranch className="size-3.5 text-muted-foreground" />
+                  ) : undefined,
+                },
+                ...parentOptions.map((item) => ({
+                  value: item.id,
+                  label: item.issueCode + " · " + item.title,
+                  icon: dialog ? (
+                    <GitBranch className="size-3.5 text-muted-foreground" />
+                  ) : undefined,
+                })),
+                ...(values.parentId && !parentOptions.some((item) => item.id === values.parentId)
+                  ? [{ value: values.parentId, label: values.parentId }]
+                  : []),
+              ]}
+              onChange={(value) => updateValue("parentId", value)}
+            />
+            <DatePicker
+              name="startDate"
+              placeholder={dialog ? "Bắt đầu" : undefined}
+              label="Ngày bắt đầu"
+              labelLayout={controlLabelLayout}
+              appearance={controlAppearance}
+              value={values.startDate}
+              max={values.endDate || undefined}
+              onChange={(value) => updateValue("startDate", value)}
+            />
+            <DatePicker
+              name="endDate"
+              placeholder={dialog ? "Kết thúc" : undefined}
+              label="Ngày kết thúc"
+              labelLayout={controlLabelLayout}
+              appearance={controlAppearance}
+              value={values.endDate}
+              min={values.startDate || undefined}
+              onChange={(value) => updateValue("endDate", value)}
+            />
+            {dialog ? (
+              <Popover open={estimateOpen} onOpenChange={setEstimateOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    aria-label="Ước lượng (giờ)"
+                    className="h-8 max-w-full rounded-full bg-muted/30 px-3 text-xs font-normal"
+                  >
+                    <Clock3 className="size-3.5 text-muted-foreground" />
+                    {values.estimateHours === "" ? "Ước lượng" : values.estimateHours + " giờ"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 space-y-3" aria-label="Ước lượng (giờ)">
+                  <Input
+                    name="estimateHours"
+                    label="Estimate (h)"
+                    type="number"
+                    min={0}
+                    step={0.5}
+                    value={values.estimateHours}
+                    placeholder="Chưa ước lượng"
+                    disabled={checking || submitting}
+                    onChange={(event) => updateValue("estimateHours", event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        setEstimateOpen(false);
+                      }
+                    }}
+                  />
+                  <p className="text-xs text-muted-foreground">Nhập số giờ theo bước 0,5.</p>
+                  <div className="flex flex-wrap gap-1">
+                    {[0.5, 1, 2, 4, 8].map((hours) => (
+                      <Button
+                        key={hours}
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => {
+                          updateValue("estimateHours", String(hours));
+                          setEstimateOpen(false);
+                        }}
+                      >
+                        {hours}h
+                      </Button>
+                    ))}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={checking || submitting || values.estimateHours === ""}
+                    onClick={() => {
+                      updateValue("estimateHours", "");
+                      setEstimateOpen(false);
+                    }}
+                  >
+                    Bỏ ước lượng
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <Input
+                name="estimateHours"
+                label="Estimate (h)"
+                labelLayout={controlLabelLayout}
+                type="number"
+                min={0}
+                step={0.5}
+                value={values.estimateHours}
+                placeholder="Chưa ước lượng"
+                className="h-9 border-0 bg-transparent px-2 shadow-none hover:bg-accent/50"
+                onChange={(event) => updateValue("estimateHours", event.target.value)}
+              />
+            )}
+            <div className="space-y-1.5">
+              <Select
+                label="Label"
+                labelLayout={controlLabelLayout}
+                appearance={controlAppearance}
+                aria-label="Label (tạm chưa sử dụng)"
+                options={[]}
+                disabled
+                placeholder={dialog ? "Label" : "Chưa sử dụng"}
+              />
+            </div>
+          </div>
           {assigneesError && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="mt-2 text-sm text-destructive">
               {assigneesError}
             </p>
           )}
           {issueState?.error && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="mt-2 text-sm text-destructive">
               {issueState.error}
             </p>
           )}
-        </div>
+        </section>
+        {!dialog && descriptionField}
       </fieldset>
       {duplicates.length > 0 && (
         <DuplicateWarning
@@ -342,7 +446,7 @@ export function IssueForm({
         </Button>
         <Button
           type="submit"
-          disabled={!trackerId || !trackerOptions.some((t) => t.id === trackerId)}
+          disabled={!trackerId || !trackerOptions.some((tracker) => tracker.id === trackerId)}
           loading={checking || submitting}
         >
           {checking ? "Đang kiểm tra trùng..." : submitLabel}

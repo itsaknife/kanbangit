@@ -75,6 +75,7 @@ async function request<T>(config: AxiosRequestConfig): Promise<T> {
 
 /** Client gọi REST API của backend. Các service luôn gọi qua đây, không gọi axios trực tiếp. */
 export const http = {
+  blob: (path: string) => request<Blob>({ method: "GET", url: path, responseType: "blob" }),
   upload: <T>(path: string, body: FormData) =>
     request<T>({ method: "POST", url: path, data: body, headers: { "Content-Type": undefined } }),
   get: <T>(path: string, query?: Query) =>

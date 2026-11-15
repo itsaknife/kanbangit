@@ -60,7 +60,7 @@ export function IssueHierarchy({ repoId, issue }: { repoId: string; issue: Issue
   );
   const parent = issue.parent ?? issues?.find((item) => item.id === issue.parentId);
   return (
-    <section className="space-y-4 rounded-lg border p-5" aria-label="Quan hệ issue">
+    <section className="space-y-4 border-t pt-6" aria-label="Quan hệ issue">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-semibold">Issue con</h2>
         <Button variant="secondary" size="sm" onClick={() => setCreatingChild(true)}>

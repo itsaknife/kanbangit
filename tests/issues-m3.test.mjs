@@ -243,7 +243,7 @@ function formHarness(
   ];
   const Select = () => null;
   const ui = Object.fromEntries(
-    ["Avatar", "Button", "Input", "Textarea"].map((name) => [name, () => null]),
+    ["Avatar", "Button", "DatePicker", "Input", "Textarea"].map((name) => [name, () => null]),
   );
   ui.Select = Select;
   const { IssueForm } = load("src/components/issues/IssueForm.tsx", {
@@ -483,7 +483,7 @@ test("hours convert to integer minutes while blank and zero stay distinct", asyn
     assert.equal(form.payloads[0].estimateMinutes, minutes);
     const control = form.nodes.find((node) => node.props?.name === "estimateHours");
     assert.equal(control.props.step, 0.5);
-    assert.match(control.props.label, /giờ/);
+    assert.match(control.props.label, /giờ|\(h\)/);
   }
   const { formatEstimateHours } = load("src/utils/formatEstimateHours.ts");
   assert.equal(formatEstimateHours(null), "Chưa có");
