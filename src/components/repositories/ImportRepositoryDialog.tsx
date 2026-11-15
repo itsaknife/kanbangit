@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRepositoriesStore } from "@/stores";
 import { Button, Modal, Spinner, ErrorMessage } from "@/components/ui";
 import { getErrorMessage } from "@/utils";
+import { Download } from "lucide-react";
 export function ImportRepositoryDialog({
   initialOpen = false,
   hideTrigger = false,
@@ -39,6 +40,7 @@ export function ImportRepositoryDialog({
     <>
       {!hideTrigger && (
         <Button
+          size="sm"
           variant="secondary"
           onClick={() => {
             setOpen(true);
@@ -46,7 +48,8 @@ export function ImportRepositoryDialog({
             void fetch();
           }}
         >
-          Import từ GitHub
+          <Download className="h-4 w-4" aria-hidden />
+          Import repo
         </Button>
       )}
       <Modal

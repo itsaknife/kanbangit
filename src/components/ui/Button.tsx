@@ -3,17 +3,17 @@ import { cn } from "@/utils";
 import { Spinner } from "./Spinner";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost";
-type Size = "sm" | "md";
+type Size = "sm" | "md" | "icon";
 
 const variantClasses: Record<Variant, string> = {
   primary: "bg-primary text-primary-foreground hover:bg-primary/90",
-  secondary:
-    "border bg-background text-foreground hover:bg-accent hover:text-accent-foreground",
+  secondary: "border bg-background text-foreground hover:bg-accent hover:text-accent-foreground",
   danger: "bg-destructive text-white hover:bg-destructive/90",
   ghost: "text-foreground hover:bg-accent hover:text-accent-foreground",
 };
 
 const sizeClasses: Record<Size, string> = {
+  icon: "h-8 w-8 shrink-0 p-0",
   sm: "px-2.5 py-1.5 text-sm",
   md: "px-4 py-2 text-sm",
 };

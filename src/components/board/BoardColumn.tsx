@@ -26,7 +26,7 @@ export function BoardColumn({ status, title, issues }: BoardColumnProps) {
           : "border-border/80 bg-background/80",
       )}
     >
-      <header className="flex shrink-0 items-center justify-between border-b px-4 py-3.5">
+      <header className="flex shrink-0 items-center justify-between border-b px-3 py-2.5">
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${STATUS_STYLES[status].dot}`} />
           <h3 className="text-sm font-semibold">{title}</h3>
@@ -36,7 +36,7 @@ export function BoardColumn({ status, title, issues }: BoardColumnProps) {
         </span>
       </header>
 
-      <div className="kanban-scrollbar flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
+      <div className="kanban-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2">
         {issues.length === 0 ? (
           <p className="py-8 text-center text-xs text-muted-foreground">Chưa có issue</p>
         ) : (
