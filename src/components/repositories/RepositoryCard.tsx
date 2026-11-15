@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RefreshCw } from "lucide-react";
 import { Badge, Button, buttonClassName, Card } from "@/components/ui";
 import { ROUTES } from "@/constants";
 import type { Repository } from "@/types/repository.types";
@@ -27,12 +28,17 @@ export function RepositoryCard({ repository, connecting, onConnect }: Repository
         <div className="flex shrink-0 items-center gap-2">
           {repository.canManage && (
             <Button
-              size="sm"
+              size="icon"
               variant="secondary"
-              loading={connecting}
+              disabled={connecting}
+              aria-label={`Đồng bộ ${repository.fullName}`}
+              title="Đồng bộ lại"
               onClick={() => onConnect(repository.id)}
             >
-              Đồng bộ lại
+              <RefreshCw
+                aria-hidden
+                className={`h-4 w-4 ${connecting ? "motion-safe:animate-spin" : ""}`}
+              />
             </Button>
           )}
           <Link href={ROUTES.board(repository.id)} className={buttonClassName({ size: "sm" })}>

@@ -2,17 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight } from "lucide-react";
 import { ROUTES } from "@/constants";
-import { useRepoId, useRepository } from "@/hooks";
+import { useRepoId } from "@/hooks";
 import { cn } from "@/utils";
 import type { Ref } from "react";
 
-/** Breadcrumb repository và hai chế độ xem công việc. */
+/** Hai chế độ xem công việc và toolbar dùng chung. */
 export function RepoTabs({ toolbarRef }: { toolbarRef?: Ref<HTMLDivElement> }) {
   const repoId = useRepoId();
   const pathname = usePathname();
-  const { repository } = useRepository(repoId);
 
   const tabs = [
     { href: ROUTES.board(repoId), label: "Bảng Kanban" },
@@ -21,14 +19,6 @@ export function RepoTabs({ toolbarRef }: { toolbarRef?: Ref<HTMLDivElement> }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2 text-sm">
-        <Link href={ROUTES.repositories} className="text-zinc-500 hover:underline">
-          Repository
-        </Link>
-        <ChevronRight aria-hidden="true" className="h-4 w-4 text-zinc-400" />
-        <span className="font-medium">{repository?.fullName ?? "..."}</span>
-      </div>
-
       {(pathname.startsWith(ROUTES.board(repoId)) ||
         pathname.startsWith(ROUTES.issues(repoId))) && (
         <div className="flex items-end justify-between gap-3 border-b">

@@ -1,6 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
-import { Button, Input, ErrorMessage, Modal } from "@/components/ui";
+import { Button, Input, Textarea, Select, ErrorMessage, Modal } from "@/components/ui";
+import { FolderGit2, Globe, LockKeyhole, Plus } from "lucide-react";
 import { useRepositoriesStore } from "@/stores";
 import { getErrorMessage } from "@/utils";
 
@@ -43,30 +44,42 @@ export function CreateRepositoryForm({
   return (
     <>
       {!hideTrigger && (
-        <div className="flex justify-end">
-          <Button
-            onClick={() => {
-              setError(null);
-              setSuccess(false);
-              setOpen(true);
-            }}
-          >
-            Tạo repository mới
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          onClick={() => {
+            setError(null);
+            setSuccess(false);
+            setOpen(true);
+          }}
+        >
+          <Plus className="h-4 w-4" aria-hidden />
+          Tạo repo mới
+        </Button>
       )}
-      {success && <p role="status">Đã tạo và kết nối repository.</p>}
+      {success && (
+        <p role="status" className="sr-only">
+          Đã tạo và kết nối repository.
+        </p>
+      )}
       <Modal
         open={open}
-        title="Tạo repository GitHub cá nhân"
+        title={
+          <span className="flex items-center gap-2 pr-8">
+            <FolderGit2 className="h-4 w-4 text-muted-foreground" />
+            Tạo repository mới
+          </span>
+        }
         onClose={() => {
           if (!loading) setOpen(false);
         }}
       >
-        <form onSubmit={submit} className="flex flex-col gap-3">
-          <label className="text-sm">
-            Tên repository
+        <form onSubmit={submit} className="space-y-5">
+          <div>
             <Input
+              aria-label="Tên repository"
+              placeholder="Tên repository"
+              autoFocus
+              className="h-12 border-0 bg-transparent px-0 text-lg font-medium shadow-none"
               required
               maxLength={100}
               pattern="[A-Za-z0-9_-][A-Za-z0-9_.-]*"
@@ -74,33 +87,45 @@ export function CreateRepositoryForm({
               onChange={(e) => setName(e.target.value)}
               disabled={loading}
             />
-          </label>
-          <label className="text-sm">
-            Mô tả
-            <Input
-              maxLength={350}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={loading}
-            />
-          </label>
-          <label className="text-sm">
-            Hiển thị
-            <select
-              className="ml-3 rounded border p-2"
+          </div>
+          <Textarea
+            aria-label="Mô tả repository"
+            placeholder="Thêm mô tả..."
+            rows={4}
+            className="resize-y border-0 bg-transparent px-0 shadow-none"
+            maxLength={350}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            disabled={loading}
+          />
+          <div className="flex flex-wrap items-center gap-3 border-t pt-4">
+            <Select
+              label="Hiển thị"
+              appearance="pill"
               value={visibility}
-              onChange={(e) => setVisibility(e.target.value as "PUBLIC" | "PRIVATE")}
+              onChange={(value) => setVisibility(value === "PUBLIC" ? "PUBLIC" : "PRIVATE")}
               disabled={loading}
-            >
-              <option value="PRIVATE">Private</option>
-              <option value="PUBLIC">Public</option>
-            </select>
-          </label>
-          <p className="text-xs text-muted-foreground">
-            GitHub cần quyền repo để tạo repository và đăng ký webhook. Nếu thiếu quyền, hãy đăng
-            nhập lại để cấp quyền.
-          </p>
-          <div className="flex justify-end gap-2">
+              options={[
+                {
+                  value: "PRIVATE",
+                  label: "Private",
+                  icon: <LockKeyhole className="h-3.5 w-3.5" />,
+                  description: "Chỉ người được cấp quyền có thể truy cập.",
+                },
+                {
+                  value: "PUBLIC",
+                  label: "Public",
+                  icon: <Globe className="h-3.5 w-3.5" />,
+                  description: "Mọi người đều có thể xem trên GitHub.",
+                },
+              ]}
+            />
+            <p className="text-xs text-muted-foreground">
+              Tạo trên tài khoản GitHub cá nhân của bạn.
+            </p>
+          </div>
+          {error && <ErrorMessage message={error} />}
+          <div className="flex justify-end gap-2 border-t pt-4">
             <Button
               type="button"
               variant="secondary"
@@ -113,7 +138,6 @@ export function CreateRepositoryForm({
               Tạo và kết nối
             </Button>
           </div>
-          {error && <ErrorMessage message={error} />}
         </form>
       </Modal>
     </>

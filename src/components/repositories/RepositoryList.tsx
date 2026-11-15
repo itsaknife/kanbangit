@@ -12,6 +12,12 @@ export function RepositoryList() {
   const { repositories, loading, error, reload, connect } = useRepositories();
   const [connectingId, setConnectingId] = useState<string | null>(null);
   const [connectError, setConnectError] = useState<string | null>(null);
+  const actions = (
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <ImportRepositoryDialog />
+      <CreateRepositoryForm />
+    </div>
+  );
 
   const handleConnect = async (repoId: string) => {
     setConnectingId(repoId);
@@ -35,16 +41,14 @@ export function RepositoryList() {
   if (error)
     return (
       <>
-        <CreateRepositoryForm />
-        <ImportRepositoryDialog />
+        {actions}
         <ErrorMessage message={getErrorMessage(error)} onRetry={reload} />
       </>
     );
   if (repositories.length === 0) {
     return (
       <>
-        <CreateRepositoryForm />
-        <ImportRepositoryDialog />
+        {actions}
         <EmptyState
           title="Chưa có repository nào"
           description="Tài khoản GitHub của bạn chưa có repository nào để kết nối."
@@ -58,8 +62,7 @@ export function RepositoryList() {
 
   return (
     <div className="flex flex-col gap-3">
-      <CreateRepositoryForm />
-      <ImportRepositoryDialog />
+      {actions}
       {connectError && <ErrorMessage message={connectError} />}
       {sorted.map((repository) => (
         <RepositoryCard

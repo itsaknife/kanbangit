@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ROUTES } from "@/constants";
-import { Card } from "@/components/ui";
 import { AssigneeAvatars } from "@/components/issues";
 import { IssueTracker } from "@/components/issues/IssueTracker";
 import type { Issue } from "@/types";
@@ -16,7 +15,7 @@ interface BoardCardContentProps {
 export function BoardCardContent({ issue, repoId }: BoardCardContentProps) {
   return (
     <>
-      <Card className="group flex min-h-[9rem] shrink-0 cursor-grab flex-col gap-3 rounded-lg border-border/80 bg-background p-4 shadow-sm transition-colors hover:border-ring">
+      <div className="group flex shrink-0 cursor-grab flex-col gap-2 rounded-md border border-border/80 bg-background p-3 transition-colors hover:border-ring">
         <div className="flex h-6 items-center justify-between gap-3">
           <span className="whitespace-nowrap font-mono text-xs text-muted-foreground">
             {issue.issueCode}
@@ -26,14 +25,14 @@ export function BoardCardContent({ issue, repoId }: BoardCardContentProps) {
         <Link
           href={ROUTES.issueDetail(repoId, issue.id)}
           title={issue.title}
-          className="line-clamp-2 min-h-10 break-words text-left text-sm font-medium leading-5 hover:text-primary hover:underline"
+          className="line-clamp-2 break-words text-left text-sm font-medium leading-5 hover:text-primary hover:underline"
         >
           {issue.title}
         </Link>
         <div className="mt-auto">
           <IssueTracker repoId={repoId} trackerId={issue.trackerId} />
         </div>
-      </Card>
+      </div>
     </>
   );
 }

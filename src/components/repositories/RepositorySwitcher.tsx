@@ -11,7 +11,6 @@ import {
   Plus,
   Search,
   Download,
-  PanelsTopLeft,
 } from "lucide-react";
 import { Button, Input, Popover, PopoverContent, PopoverTrigger } from "@/components/ui";
 import { useRepositories } from "@/hooks";
@@ -51,30 +50,37 @@ export function RepositorySwitcher() {
           <button
             type="button"
             aria-label="Chọn repository"
-            className="flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-7 min-w-0 items-center gap-1.5 rounded-md px-1.5 text-xs font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <PanelsTopLeft className="h-5 w-5 shrink-0 text-emerald-500" />
             <span className="max-w-[35vw] truncate sm:max-w-80">
               {current?.fullName ?? "Kanbangit"}
             </span>
-            <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <ChevronsUpDown className="h-3 w-3 shrink-0 text-muted-foreground" />
           </button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-80 max-w-[calc(100vw-2rem)] p-1">
-          <div className="relative border-b p-2">
-            <Search aria-hidden className="absolute left-4 top-5 h-4 w-4 text-muted-foreground" />
+        <PopoverContent
+          compact
+          align="start"
+          sideOffset={4}
+          style={{ width: "min(18rem, calc(100vw - 2rem))" }}
+        >
+          <div className="relative border-b px-1 pb-1">
+            <Search
+              aria-hidden
+              className="pointer-events-none absolute left-3 top-3.5 h-3.5 w-3.5 text-muted-foreground"
+            />
             <Input
               aria-label="Tìm repository"
               placeholder="Tìm repository..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-9 border-0 bg-transparent pl-8 shadow-none"
+              className="h-8 border-0 bg-transparent pl-7 text-xs shadow-none"
             />
           </div>
           <Link
             href={ROUTES.repositories}
             onClick={() => setOpen(false)}
-            className="my-1 flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
+            className="my-0.5 flex items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-accent"
           >
             <LayoutGrid className="h-4 w-4 text-muted-foreground" />
             Tất cả repo{!repoId && <Check className="ml-auto h-4 w-4" />}
@@ -104,7 +110,8 @@ export function RepositorySwitcher() {
                 href={ROUTES.board(repo.id)}
                 onClick={() => setOpen(false)}
                 aria-current={repo.id === repoId ? "page" : undefined}
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                title={repo.fullName}
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <FolderGit2 className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <span className="truncate">{repo.fullName}</span>
@@ -112,10 +119,11 @@ export function RepositorySwitcher() {
               </Link>
             ))}
           </div>
-          <div className="space-y-1 border-t py-1">
+          <div className="space-y-0.5 border-t pt-1">
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              size="sm"
+              className="w-full justify-start text-xs"
               onClick={() => startAction("create")}
             >
               <Plus className="h-4 w-4" />
@@ -123,7 +131,8 @@ export function RepositorySwitcher() {
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              size="sm"
+              className="w-full justify-start text-xs"
               onClick={() => startAction("import")}
             >
               <Download className="h-4 w-4" />

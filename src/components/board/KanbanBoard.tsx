@@ -71,7 +71,7 @@ export function KanbanBoard() {
   if (error) return <ErrorMessage message={getErrorMessage(error)} onRetry={reload} />;
 
   return (
-    <section className="flex h-[calc(100dvh-13rem)] min-h-[36rem] min-w-0 flex-col gap-3 overflow-hidden rounded-xl border border-border/70 bg-muted/35 p-3 shadow-sm dark:bg-zinc-900/60 lg:p-4">
+    <section className="flex h-[calc(100dvh-10rem)] min-h-[36rem] min-w-0 flex-col gap-3 overflow-hidden rounded-xl border border-border/70 bg-muted/35 p-3 shadow-sm dark:bg-zinc-900/60">
       {toolbar &&
         createPortal(
           <>

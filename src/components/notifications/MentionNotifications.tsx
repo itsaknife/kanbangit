@@ -42,13 +42,13 @@ export function MentionNotifications() {
     >
       <PopoverTrigger asChild>
         <Button
-          size="sm"
+          size="icon"
           variant="ghost"
           className="relative"
           aria-label={`Thông báo nhắc tên: ${unread} chưa đọc`}
           title="Thông báo nhắc tên"
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-3.5 w-3.5" />
           {unread > 0 && (
             <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
               {unread > 99 ? "99+" : unread}
