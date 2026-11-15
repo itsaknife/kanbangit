@@ -2,19 +2,33 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, ChartNoAxesCombined, ListTodo, Tags, UsersRound } from "lucide-react";
+import {
+  ArrowLeft,
+  ChartNoAxesCombined,
+  Clock3,
+  ListTodo,
+  Tags,
+  UsersRound,
+  RefreshCw,
+} from "lucide-react";
+import { useRepository } from "@/hooks/useRepository";
 import { ROUTES } from "@/constants";
 import { cn } from "@/utils";
 
 export function RepositorySidebar({ repoId }: { repoId: string }) {
   const pathname = usePathname();
+  const { repository } = useRepository(repoId);
   const workActive =
     pathname.startsWith(ROUTES.board(repoId)) || pathname.startsWith(ROUTES.issues(repoId));
   const entries = [
     { href: ROUTES.board(repoId), label: "Công việc", icon: ListTodo, active: workActive },
     { href: ROUTES.dashboard(repoId), label: "Dashboard", icon: ChartNoAxesCombined },
+    { href: `/repositories/${repoId}/time`, label: "Thời gian", icon: Clock3 },
     { href: `/repositories/${repoId}/members`, label: "Thành viên", icon: UsersRound },
     { href: `/repositories/${repoId}/trackers`, label: "Trackers", icon: Tags },
+    ...(repository?.canManage
+      ? [{ href: `/repositories/${repoId}/sync`, label: "GitHub Sync", icon: RefreshCw }]
+      : []),
   ];
   return (
     <aside className="group relative z-30 shrink-0 border-b md:w-14 md:border-b-0">

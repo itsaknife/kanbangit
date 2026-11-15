@@ -8,6 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { ChevronDown, LogOut, UserRound } from "lucide-react";
 import { RepositorySwitcher } from "@/components/repositories/RepositorySwitcher";
 import { useState } from "react";
+import { MentionNotifications } from "@/components/notifications/MentionNotifications";
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -21,6 +22,7 @@ export function Header() {
         {user && (
           <div className="flex items-center gap-3">
             <ThemeToggle />
+            <MentionNotifications />
             <Popover open={accountOpen} onOpenChange={setAccountOpen}>
               <PopoverTrigger asChild>
                 <button
@@ -34,8 +36,8 @@ export function Header() {
                     size={28}
                     unoptimized
                   />
-                  <span className="text-sm">{user.displayName || user.name || user.login}</span>
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  {/* <span className="text-sm">{user.displayName || user.name || user.login}</span> */}
+                  {/* <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> */}
                 </button>
               </PopoverTrigger>
               <PopoverContent align="end" className="w-64 p-1">

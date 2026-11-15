@@ -1,4 +1,5 @@
 import type { UserSummary } from "./user.types";
+import type { SyncStatus } from "./sync.types";
 export type IssueStatus =
   | "todo"
   | "in_progress"
@@ -43,7 +44,7 @@ export interface Issue {
   parent?: IssueParent | null;
   combinedEstimateMinutes: number | null;
   subIssueEstimateMinutes: number;
-  syncStatus: string;
+  syncStatus: SyncStatus;
 }
 export interface IssueFilters {
   status: IssueStatus | "all";

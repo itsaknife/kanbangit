@@ -1,4 +1,6 @@
 export * from "./Avatar";
+export * from "./Calendar";
+export * from "./DatePicker";
 export * from "./Badge";
 export * from "./Button";
 export * from "./Card";

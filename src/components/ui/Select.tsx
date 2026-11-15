@@ -3,6 +3,7 @@ import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useId, useState, type ReactNode } from "react";
 import { cn } from "@/utils";
+import { fieldLayoutClassName, type LabelLayout } from "./fieldStyles";
 export interface SelectOption {
   value: string;
   label: string;
@@ -12,6 +13,8 @@ export interface SelectOption {
 }
 interface SelectProps {
   label?: string;
+  labelLayout?: LabelLayout;
+  appearance?: "field" | "pill" | "subtle";
   options: SelectOption[];
   value?: string;
   defaultValue?: string;
@@ -25,6 +28,8 @@ interface SelectProps {
 }
 export function Select({
   label,
+  labelLayout,
+  appearance = "field",
   options,
   value,
   defaultValue,
@@ -44,9 +49,12 @@ export function Select({
   // Radix reserves the empty string for clearing a selection.
   const emptyValue = `${generatedId}-empty`;
   return (
-    <div className="flex flex-col gap-1">
+    <div className={fieldLayoutClassName(appearance === "pill" ? "vertical" : labelLayout)}>
       {label && (
-        <label htmlFor={selectId} className="text-sm font-medium">
+        <label
+          htmlFor={selectId}
+          className={appearance === "pill" ? "sr-only" : "text-sm font-medium"}
+        >
           {label}
         </label>
       )}
@@ -63,23 +71,29 @@ export function Select({
         <SelectPrimitive.Trigger
           id={selectId}
           className={cn(
-            "flex h-10 w-full items-center justify-between gap-3 rounded-md border border-input bg-background px-3 py-2 text-left text-sm shadow-sm outline-none transition-colors hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:border-ring disabled:cursor-not-allowed disabled:opacity-50",
+            "flex min-w-0 max-w-full items-center justify-between text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:border-ring disabled:cursor-not-allowed disabled:opacity-50",
+            appearance === "pill"
+              ? "h-8 max-w-[15rem] gap-2 rounded-full border border-input bg-muted/30 px-3 text-xs"
+              : appearance === "subtle"
+                ? "h-9 w-full gap-2 rounded-md border-0 bg-transparent px-2 text-sm"
+                : "h-10 w-full gap-3 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm",
             className,
           )}
           aria-label={props["aria-label"]}
+          title={selectedOption?.label ?? label}
         >
-          <span className="flex min-w-0 items-center gap-2">
-            <SelectPrimitive.Value placeholder={placeholder}>
+          <span className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+            <SelectPrimitive.Value className="flex min-w-0 flex-1" placeholder={placeholder}>
               {selectedOption && (
-                <span className="flex min-w-0 items-center gap-2">
-                  {selectedOption.icon}
+                <span className="flex min-w-0 flex-1 items-center gap-2">
+                  {selectedOption.icon && <span className="shrink-0">{selectedOption.icon}</span>}
                   <span className="truncate">{selectedOption.label}</span>
                 </span>
               )}
             </SelectPrimitive.Value>
           </span>
-          <SelectPrimitive.Icon>
-            <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <SelectPrimitive.Icon className="shrink-0">
+            <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
           </SelectPrimitive.Icon>
         </SelectPrimitive.Trigger>
         <SelectPrimitive.Portal>
