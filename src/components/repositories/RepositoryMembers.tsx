@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRepoId } from "@/hooks";
+import { useRepoId, useRepository } from "@/hooks";
 import { useMembersStore } from "@/stores/members.store";
 import { Avatar, Button, ErrorMessage, Spinner, Modal } from "@/components/ui";
 export function RepositoryMembers() {
   const id = useRepoId();
+  const { repository } = useRepository(id);
   const state = useMembersStore((s) => s.byRepository[id]);
   const fetch = useMembersStore((s) => s.fetch);
   const sync = useMembersStore((s) => s.sync);
@@ -15,8 +16,8 @@ export function RepositoryMembers() {
   }, [id, fetch]);
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Repository members</h1>
-      {state?.canManage && (
+      <h1 className="text-xl font-semibold">Thành viên Project</h1>
+      {state?.canManage && repository?.providerType === "GITHUB" && (
         <Button loading={state.busy} onClick={() => void sync(id)}>
           Đồng bộ từ GitHub
         </Button>

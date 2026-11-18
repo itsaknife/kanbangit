@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { buttonClassName, EmptyState, ErrorMessage, Select, Spinner } from "@/components/ui";
 import { BOARD_COLUMNS, ROUTES } from "@/constants";
-import { useIssue, useIssueId, useRepoId } from "@/hooks";
+import { useIssue, useIssueId, useRepoId, useRepository } from "@/hooks";
 import { formatDateTime, getErrorMessage } from "@/utils";
 import { IssueHierarchy } from "./IssueHierarchy";
 import { IssueForm } from "./IssueForm";
@@ -19,6 +19,7 @@ const STATUS_OPTIONS = BOARD_COLUMNS.map((column) => ({
 
 export function IssueDetail() {
   const repoId = useRepoId();
+  const { repository } = useRepository(repoId);
   const issueId = useIssueId();
   const { issue, loading, error, reload, updateIssue, changeStatus } = useIssue(repoId, issueId);
   const [statusError, setStatusError] = useState<string | null>(null);
@@ -55,7 +56,14 @@ export function IssueDetail() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          <IssueSync key={issue.id} repoId={repoId} issueId={issue.id} status={issue.syncStatus} />
+          {repository?.providerType === "GITHUB" && (
+            <IssueSync
+              key={issue.id}
+              repoId={repoId}
+              issueId={issue.id}
+              status={issue.syncStatus}
+            />
+          )}
           {issue.htmlUrl && (
             <a
               href={issue.htmlUrl}

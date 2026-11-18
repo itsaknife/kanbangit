@@ -26,7 +26,7 @@ export function RepositoryCard({ repository, connecting, onConnect }: Repository
 
       {repository.isConnected ? (
         <div className="flex shrink-0 items-center gap-2">
-          {repository.canManage && (
+          {repository.canManage && repository.providerType === "GITHUB" && (
             <Button
               size="icon"
               variant="secondary"

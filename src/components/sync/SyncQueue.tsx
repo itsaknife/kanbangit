@@ -20,8 +20,8 @@ export function SyncQueue() {
     retry = useSyncStore((s) => s.retry);
   const busy = useSyncStore((s) => s.busy[repoId]);
   const reload = useCallback(() => {
-    if (repository?.canManage) void load(repoId, page);
-  }, [repository?.canManage, load, repoId, page]);
+    if (repository?.canManage && repository.providerType === "GITHUB") void load(repoId, page);
+  }, [repository, load, repoId, page]);
   useSyncRefresh(repoId, reload);
   const runRetry = async (issueId?: string) => {
     setActionError(null);
@@ -36,6 +36,8 @@ export function SyncQueue() {
   };
   if (error) return <ErrorMessage message={getErrorMessage(error)} />;
   if (loading) return <Spinner />;
+  if (repository?.providerType === "KANBANGIT")
+    return <EmptyState title="Project KanbanGit không sử dụng GitHub Sync" />;
   if (!repository?.canManage) return <EmptyState title="Chỉ Owner được xem Sync Queue" />;
   return (
     <section className="space-y-6">

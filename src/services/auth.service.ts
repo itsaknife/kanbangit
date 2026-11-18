@@ -7,7 +7,7 @@ export const authService = {
   getMe: () => http.get<User>("/auth/me"),
 
   /** Đường dẫn bắt đầu luồng OAuth GitHub (backend sẽ chuyển hướng sang GitHub). */
-  getLoginUrl: () => `${env.apiUrl}/auth/github`,
+  getLoginUrl: (provider: "google" | "github" = "github") => `${env.apiUrl}/auth/${provider}`,
 
   logout: () => http.post<void>("/auth/logout"),
 };

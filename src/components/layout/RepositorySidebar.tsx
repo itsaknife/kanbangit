@@ -23,11 +23,11 @@ export function RepositorySidebar({ repoId }: { repoId: string }) {
   const entries = [
     { href: ROUTES.board(repoId), label: "Công việc", icon: ListTodo, active: workActive },
     { href: ROUTES.dashboard(repoId), label: "Dashboard", icon: ChartNoAxesCombined },
-    { href: `/repositories/${repoId}/time`, label: "Thời gian", icon: Clock3 },
-    { href: `/repositories/${repoId}/members`, label: "Thành viên", icon: UsersRound },
-    { href: `/repositories/${repoId}/trackers`, label: "Trackers", icon: Tags },
-    ...(repository?.canManage
-      ? [{ href: `/repositories/${repoId}/sync`, label: "GitHub Sync", icon: RefreshCw }]
+    { href: `/projects/${repoId}/time`, label: "Thời gian", icon: Clock3 },
+    { href: `/projects/${repoId}/members`, label: "Thành viên", icon: UsersRound },
+    { href: `/projects/${repoId}/trackers`, label: "Trackers", icon: Tags },
+    ...(repository?.canManage && repository.providerType === "GITHUB"
+      ? [{ href: `/projects/${repoId}/sync`, label: "GitHub Sync", icon: RefreshCw }]
       : []),
   ];
   return (

@@ -1,12 +1,13 @@
 export interface Repository {
+  providerType: "GITHUB" | "KANBANGIT";
   id: string;
-  githubId: string;
+  githubId: string | null;
   name: string;
-  owner: string;
+  owner: string | null;
   /** Dạng "owner/name", ví dụ "huytran/my-project". */
   fullName: string;
   description: string | null;
-  isPrivate: boolean;
+  isPrivate: boolean | null;
   /** Đã được kết nối vào hệ thống (đã đồng bộ issue + đăng ký webhook) hay chưa. */
   isConnected: boolean;
   openIssuesCount: number;
@@ -25,6 +26,7 @@ export interface CreateRepositoryPayload {
   name: string;
   description?: string;
   visibility: "PUBLIC" | "PRIVATE";
+  providerType?: "GITHUB" | "KANBANGIT";
 }
 
 export interface RepositoryMember {

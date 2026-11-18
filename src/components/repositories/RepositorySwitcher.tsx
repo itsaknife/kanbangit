@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useAuth } from "@/hooks";
 import { useState } from "react";
 import {
   Check,
@@ -21,6 +22,8 @@ import { CreateRepositoryForm } from "./CreateRepositoryForm";
 import { ImportRepositoryDialog } from "./ImportRepositoryDialog";
 
 export function RepositorySwitcher() {
+  const { user } = useAuth();
+  const githubLinked = !!user?.identities?.some((i) => i.provider === "GITHUB");
   const { repoId } = useParams<{ repoId?: string }>();
   const { repositories, loading, error, reload } = useRepositories();
   const detail = useRepositoriesStore((s) => (repoId ? s.details[repoId]?.data : undefined));
@@ -129,15 +132,17 @@ export function RepositorySwitcher() {
               <Plus className="h-4 w-4" />
               Tạo repo mới
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start text-xs"
-              onClick={() => startAction("import")}
-            >
-              <Download className="h-4 w-4" />
-              Import repo đã có
-            </Button>
+            {githubLinked && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-xs"
+                onClick={() => startAction("import")}
+              >
+                <Download className="h-4 w-4" />
+                Import repo đã có
+              </Button>
+            )}
           </div>
         </PopoverContent>
       </Popover>

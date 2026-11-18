@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         error,
         logout,
-        updateUser: (user) => setData(() => user),
+        updateUser: (user) => setData((current) => ({ ...current, ...user })),
       }}
     >
       {children}

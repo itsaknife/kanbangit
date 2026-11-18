@@ -4,7 +4,12 @@ type ClassValue = string | false | null | undefined | ClassValue[];
 export function cn(...classes: ClassValue[]): string {
   return classes
     .reduce<string[]>((result, value) => {
-      if (Array.isArray(value)) return result.concat(cn(...value).split(" ").filter(Boolean));
+      if (Array.isArray(value))
+        return result.concat(
+          cn(...value)
+            .split(" ")
+            .filter(Boolean),
+        );
       if (value) result.push(value);
       return result;
     }, [])

@@ -4,11 +4,11 @@ type Id = number | string;
 export const ROUTES = {
   home: "/",
   login: "/login",
-  repositories: "/repositories",
+  repositories: "/projects",
   settings: "/settings",
-  board: (repoId: Id) => `/repositories/${repoId}/board`,
-  issues: (repoId: Id) => `/repositories/${repoId}/issues`,
-  issueCreate: (repoId: Id) => `/repositories/${repoId}/issues/new`,
-  issueDetail: (repoId: Id, issueId: string) => `/repositories/${repoId}/issues/${issueId}`,
-  dashboard: (repoId: Id) => `/repositories/${repoId}/dashboard`,
+  board: (repoId: Id) => `/projects/${repoId}/board`,
+  issues: (repoId: Id) => `/projects/${repoId}/issues`,
+  issueCreate: (repoId: Id) => `/projects/${repoId}/issues/new`,
+  issueDetail: (repoId: Id, issueId: string) => `/projects/${repoId}/issues/${issueId}`,
+  dashboard: (repoId: Id) => `/projects/${repoId}/dashboard`,
 } as const;

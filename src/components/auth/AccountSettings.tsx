@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, GitBranch, Moon, Sun, UserRound, Palette } from "lucide-react";
+import { ArrowLeft, Moon, Sun, UserRound, Palette } from "lucide-react";
 import { useAuth } from "@/hooks";
 import { useTheme } from "@/providers/ThemeProvider";
 import { ROUTES } from "@/constants";
 import { Button } from "@/components/ui";
+import { ConnectedAccounts } from "./ConnectedAccounts";
 import { ProfileSettings } from "./ProfileSettings";
 
 export function AccountSettings() {
@@ -53,19 +54,7 @@ export function AccountSettings() {
           <h2 className="text-base font-semibold">Hồ sơ hiển thị</h2>
           <ProfileSettings user={user} />
         </section>
-        <section className="space-y-4">
-          <h2 className="text-base font-semibold">Tài khoản kết nối</h2>
-          <div className="flex items-center gap-4 rounded-lg border bg-card p-5">
-            <GitBranch className="h-6 w-6" />
-            <div className="flex-1">
-              <p className="text-sm font-medium">GitHub</p>
-              <p className="text-xs text-muted-foreground">@{user.login}</p>
-            </div>
-            <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-700 dark:text-emerald-400">
-              Đã kết nối
-            </span>
-          </div>
-        </section>
+        <ConnectedAccounts />
         <section id="appearance" className="scroll-mt-6 space-y-4">
           <h2 className="text-base font-semibold">Giao diện</h2>
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-card p-5">

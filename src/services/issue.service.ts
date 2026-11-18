@@ -6,7 +6,7 @@ import type {
   UpdateIssuePayload,
 } from "@/types";
 import { http } from "./http";
-const path = (repoId: string, id: string) => `/repositories/${repoId}/issues/${id}`;
+const path = (repoId: string, id: string) => `/projects/${repoId}/issues/${id}`;
 export const issueService = {
   // Board grouping and client filters require the complete repository list.
   list: async (repoId: string): Promise<Issue[]> => {
@@ -14,13 +14,10 @@ export const issueService = {
     let page = 1;
     let totalPages: number;
     do {
-      const response = await http.get<IssueListResponse | Issue[]>(
-        `/repositories/${repoId}/issues`,
-        {
-          page,
-          limit: 200,
-        },
-      );
+      const response = await http.get<IssueListResponse | Issue[]>(`/projects/${repoId}/issues`, {
+        page,
+        limit: 200,
+      });
       // Support the unpaginated contract while an existing backend process is upgraded.
       if (Array.isArray(response)) {
         if (page !== 1)
@@ -48,7 +45,7 @@ export const issueService = {
   },
   getById: (repoId: string, id: string) => http.get<Issue>(path(repoId, id)),
   create: (repoId: string, payload: CreateIssuePayload) =>
-    http.post<Issue>(`/repositories/${repoId}/issues`, payload),
+    http.post<Issue>(`/projects/${repoId}/issues`, payload),
   update: (repoId: string, id: string, payload: UpdateIssuePayload) =>
     http.patch<Issue>(path(repoId, id), payload),
   updateStatus: (repoId: string, id: string, status: IssueStatus) =>

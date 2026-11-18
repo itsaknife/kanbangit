@@ -10,6 +10,7 @@ export interface IssueAssignee extends UserSummary {
 }
 
 export interface User extends UserSummary {
+  identities?: { provider: "GOOGLE" | "GITHUB" }[];
   id: string;
   name: string | null;
   displayName: string | null;

@@ -1,6 +1,6 @@
 import { http } from "./http";
 import type { SyncInfo, SyncQueueResult } from "@/types/sync.types";
-const root = (repoId: string) => `/repositories/${repoId}`;
+const root = (repoId: string) => `/projects/${repoId}`;
 export const syncService = {
   info: (repoId: string, issueId: string) =>
     http.get<SyncInfo>(`${root(repoId)}/issues/${issueId}/sync`),

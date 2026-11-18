@@ -88,10 +88,10 @@ test("worklog service follows BE routes and query contract", async () => {
   await worklogService.list("repo", { period: "custom", from: "2020-01-01", to: "2020-01-02" });
   await worklogService.create("repo", "issue", { startAt: "s", endAt: "e" });
   await worklogService.summary("repo", "issue");
-  assert.equal(calls[0][1], "/repositories/repo/worklogs");
+  assert.equal(calls[0][1], "/projects/repo/worklogs");
   assert.equal(calls[0][2].from, "2020-01-01");
-  assert.equal(calls[1][1], "/repositories/repo/issues/issue/worklogs");
-  assert.equal(calls[2][1], "/repositories/repo/issues/issue/time-summary");
+  assert.equal(calls[1][1], "/projects/repo/issues/issue/worklogs");
+  assert.equal(calls[2][1], "/projects/repo/issues/issue/time-summary");
 });
 test("comment uploads use FormData and downloads use authenticated blob client", async () => {
   const calls = [];
@@ -106,9 +106,9 @@ test("comment uploads use FormData and downloads use authenticated blob client",
   const file = new File(["content"], "file.txt", { type: "text/plain" });
   await commentService.upload("repo", "comment", file);
   await commentService.download("repo", "attachment");
-  assert.equal(calls[0][0], "/repositories/repo/comments/comment/attachments");
+  assert.equal(calls[0][0], "/projects/repo/comments/comment/attachments");
   assert.equal(calls[0][1].get("file").name, "file.txt");
-  assert.equal(calls[1][0], "/repositories/repo/attachments/attachment");
+  assert.equal(calls[1][0], "/projects/repo/attachments/attachment");
 });
 test("worklog store discards out-of-order responses", async () => {
   const pending = [];

@@ -90,7 +90,7 @@ export function MentionNotifications() {
           {data.map((item) => (
             <Link
               key={item.id}
-              href={`/repositories/${item.repositoryId}/issues/${item.issueId}#comment-${item.commentId}`}
+              href={`/projects/${item.repositoryId}/issues/${item.issueId}#comment-${item.commentId}`}
               className="block rounded-md px-3 py-3 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => {
                 setOpen(false);
