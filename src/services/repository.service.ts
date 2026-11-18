@@ -4,21 +4,27 @@ import type { CreateRepositoryPayload, RepositoryMember } from "@/types/reposito
 import type { AvailableRepository } from "@/types/repository.types";
 
 export const repositoryService = {
-  available: () => http.get<AvailableRepository[]>("/repositories/available"),
-  import: (githubId: string) => http.post<Repository>("/repositories/import", { githubId }),
+  available: () => http.get<AvailableRepository[]>("/github/projects/available"),
+  import: (githubId: string) => http.post<Repository>("/github/projects/import", { githubId }),
   transferOwner: (repoId: string, memberId: string) =>
-    http.patch<{ message: string }>(`/repositories/${repoId}/owner`, { memberId }),
-  create: (payload: CreateRepositoryPayload) => http.post<Repository>("/repositories", payload),
-  getMembers: (repoId: string) => http.get<RepositoryMember[]>(`/repositories/${repoId}/members`),
+    http.patch<{ message: string }>(`/projects/${repoId}/owner`, { memberId }),
+  create: (payload: CreateRepositoryPayload) =>
+    http.post<Repository>(
+      payload.providerType === "KANBANGIT" ? "/projects" : "/github/projects",
+      payload.providerType === "KANBANGIT"
+        ? { name: payload.name, description: payload.description }
+        : { name: payload.name, description: payload.description, visibility: payload.visibility },
+    ),
+  getMembers: (repoId: string) => http.get<RepositoryMember[]>(`/projects/${repoId}/members`),
   syncMembers: (repoId: string) =>
-    http.post<RepositoryMember[]>(`/repositories/${repoId}/members/sync`),
+    http.post<RepositoryMember[]>(`/projects/${repoId}/members/sync`),
   /** Danh sách repository của người dùng trên GitHub, kèm trạng thái đã kết nối hay chưa. */
-  list: () => http.get<Repository[]>("/repositories"),
+  list: () => http.get<Repository[]>("/projects"),
 
-  getById: (repoId: string) => http.get<Repository>(`/repositories/${repoId}`),
+  getById: (repoId: string) => http.get<Repository>(`/projects/${repoId}`),
 
   /** Những người có thể được giao issue trong repository. */
-  getAssignees: (repoId: string) => http.get<IssueAssignee[]>(`/repositories/${repoId}/assignees`),
+  getAssignees: (repoId: string) => http.get<IssueAssignee[]>(`/projects/${repoId}/assignees`),
   /** Kết nối repository: backend lấy toàn bộ issue hiện có và đăng ký webhook. */
-  connect: (repoId: string) => http.post<Repository>(`/repositories/${repoId}/connect`),
+  connect: (repoId: string) => http.post<Repository>(`/projects/${repoId}/connect`),
 };

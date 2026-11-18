@@ -35,7 +35,7 @@ export function WorklogRows({
               {showIssue && (
                 <Link
                   className="block text-sm font-medium hover:underline"
-                  href={`/repositories/${repoId}/issues/${row.issueId}`}
+                  href={`/projects/${repoId}/issues/${row.issueId}`}
                 >
                   {row.issue.issueCode} · {row.issue.title}
                 </Link>

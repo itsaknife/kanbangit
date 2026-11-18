@@ -137,7 +137,7 @@ test("service uses UUID routes, unwraps the list envelope, and preserves raw mut
     ]),
   );
   const { issueService } = load("src/services/issue.service.ts", { "./http": { http } });
-  const base = "/repositories/" + repoId + "/issues";
+  const base = "/projects/" + repoId + "/issues";
   assert.deepEqual(await issueService.list(repoId), []);
   assert.deepEqual(calls.pop(), ["get", base, { page: 1, limit: 200 }]);
   await issueService.getById(repoId, firstId);
@@ -419,7 +419,7 @@ test("list fetches all envelope pages at limit 200 and returns a flat array", as
       { page: 3, limit: 200 },
     ],
   );
-  for (const [url] of calls) assert.equal(url, "/repositories/" + repoId + "/issues");
+  for (const [url] of calls) assert.equal(url, "/projects/" + repoId + "/issues");
 });
 
 test("list rejects later page failures instead of supplying an incomplete board", async () => {

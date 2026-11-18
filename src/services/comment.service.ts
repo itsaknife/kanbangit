@@ -1,6 +1,6 @@
 import { http } from "./http";
 import type { Attachment, Comment } from "@/types/collaboration.types";
-const root = (repoId: string) => `/repositories/${repoId}`;
+const root = (repoId: string) => `/projects/${repoId}`;
 export const commentService = {
   list: (repoId: string, issueId: string) =>
     http.get<{ data: Comment[] }>(root(repoId) + `/issues/${issueId}/comments`).then((r) => r.data),

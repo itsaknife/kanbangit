@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/hooks";
 import { useState } from "react";
 import { EmptyState, ErrorMessage, Spinner } from "@/components/ui";
 import { useRepositories } from "@/hooks";
@@ -9,12 +10,14 @@ import { CreateRepositoryForm } from "./CreateRepositoryForm";
 import { ImportRepositoryDialog } from "./ImportRepositoryDialog";
 
 export function RepositoryList() {
+  const { user } = useAuth();
+  const githubLinked = !!user?.identities?.some((i) => i.provider === "GITHUB");
   const { repositories, loading, error, reload, connect } = useRepositories();
   const [connectingId, setConnectingId] = useState<string | null>(null);
   const [connectError, setConnectError] = useState<string | null>(null);
   const actions = (
     <div className="flex flex-wrap items-center justify-end gap-2">
-      <ImportRepositoryDialog />
+      {githubLinked && <ImportRepositoryDialog />}
       <CreateRepositoryForm />
     </div>
   );
@@ -50,8 +53,8 @@ export function RepositoryList() {
       <>
         {actions}
         <EmptyState
-          title="Chưa có repository nào"
-          description="Tài khoản GitHub của bạn chưa có repository nào để kết nối."
+          title="Chưa có Project nào"
+          description="Tạo Project KanbanGit hoặc kết nối repository GitHub để bắt đầu."
         />
       </>
     );

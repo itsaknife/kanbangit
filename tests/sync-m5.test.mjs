@@ -40,10 +40,10 @@ test("sync services use the exact scoped BE endpoints and pagination", async () 
   await s.retry("r", "i");
   await s.retry("r");
   assert.deepEqual(calls, [
-    ["get", "/repositories/r/issues/i/sync"],
-    ["get", "/repositories/r/sync/queue", { page: 3, limit: 20 }],
-    ["post", "/repositories/r/issues/i/sync/retry"],
-    ["post", "/repositories/r/sync/retry"],
+    ["get", "/projects/r/issues/i/sync"],
+    ["get", "/projects/r/sync/queue", { page: 3, limit: 20 }],
+    ["post", "/projects/r/issues/i/sync/retry"],
+    ["post", "/projects/r/sync/retry"],
   ]);
 });
 test("out-of-order sync info responses cannot regress the displayed state", async () => {

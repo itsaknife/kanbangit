@@ -5,7 +5,7 @@ import type {
   WorklogPayload,
   WorklogResult,
 } from "@/types/collaboration.types";
-const root = (repoId: string) => `/repositories/${repoId}`;
+const root = (repoId: string) => `/projects/${repoId}`;
 export const worklogService = {
   list: (repoId: string, query: TimeQuery) =>
     http.get<WorklogResult>(root(repoId) + "/worklogs", { ...query }),
